@@ -12,52 +12,38 @@
   <body>
     <div class="container">
       <div id="app" class="container">
-        <button class="btn btn-lg btn-primary w-100 mt-3" type="submit" @click="checkLogin">
-            確認登入
-        </button>
-        <table class="table mt-4">
+        <table class="table table-hover mt-4">
           <thead>
-            <tr>
-              <th>產品名稱</th>
-              <th width="120">
-                原價
-              </th>
-              <th width="120">
-                售價
-              </th>
-              <th width="150">
-                是否啟用
-              </th>
-              <th width="120">
-                刪除
-              </th>
-            </tr>
+              <tr>
+                  <th >產品名稱</th>
+                  <th width="120">原價</th>
+                  <th width="120">售價</th>
+                  <th width="150">是否啟用</th>
+                  <th width="120">刪除</th>
+              </tr>
           </thead>
-          <tbody id="productList">
-            <tr>
-              <td>範例標題</td>
-              <td width="120">
-                範例原價
-              </td>
-              <td width="120">
-                範例價格
-              </td>
-              <td width="100">
-                <span class="">範例啟用狀態</span>
-              </td>
-              <td width="120">
-                <button type="button" class="btn btn-sm btn-outline-danger move deleteBtn" data-action="remove" data-id=""> 刪除 </button>
-              </td>
-            </tr>
+          <tbody>
+              <tr v-for="item in products" :key="item.id">
+                  <td >{{ item.title }}</td>
+                  <td width="120">{{ item.origin_price }}</td>
+                  <td width="120">{{ item.price }}</td>
+                  <td width="150">
+                      <span @click="item.is_enabled = !item.is_enabled" class="text-success">{{
+                          item.is_enabled ? '啟用':'未啟用'}}</span>
+                  </td>
+                  <td width="120">
+                    <button type="button" class="btn btn-sm btn-outline-danger move deleteBtn" data-action="remove" data-id="" @click="DelData(item.id)"> 刪除 </button>
+                  </td>
+              </tr>
           </tbody>
-        </table>
-        <p>目前有 <span id="productCount">0</span> 項產品</p>
+      </table>
+      <p>目前有 <span v-once>{{ products.length }}</span> 項產品</p>
       </div>
     </div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js'
             integrity='sha512-Xk3wWei2TGrsh9kDSBKUMIjw/86sLUvhtnv9f7fOuIwhhiUTKz8szkWkzHthrM5Bb3Bu9idSzkxOrkzhcneuiw=='
             crossorigin='anonymous'></script>
-            <script type="module" src="app.js" ></script>
+            <script type="module" src="./products.js" ></script>
   </body>
 
 </html>
