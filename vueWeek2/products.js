@@ -13,10 +13,9 @@ const App = createApp({
         checkLogin() {
             const api = `${this.apiUrl}/api/user/check`;
             axios.post(api).then((res) => {
-                const { success } = res.data;
-                if (success) { this.getData(); };
+                this.getData();
             }).catch((err) => {
-                alert(err.data.message);
+                window.location = "./index.html";
             });
         },
         getData() {
@@ -27,15 +26,11 @@ const App = createApp({
                 alert(err.data.message);
             });
         },
-        DelData: function (id) {
+        delData(id) {
             //選項刪除
             const api = `${this.apiUrl}/api/${this.apiPath}/admin/product/${id}`;
             axios.delete(api).then((res) => {
-                const { success } = res.data;
-                if (success) { 
-                    this.getData(); 
-                    alert('刪除成功');
-                };
+                this.getData(); 
             }).catch((err) => {
                 alert(err.data.message);
             });
@@ -43,9 +38,7 @@ const App = createApp({
     },
     mounted() {
         // 取出 Token
-        // 利用助教上課的方式  解析不出來???
-        //const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
-        const token = document.cookie.split('henToken=')[1];
+        const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
         axios.defaults.headers.common.Authorization = token;
 
         this.checkLogin()

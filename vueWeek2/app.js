@@ -16,7 +16,7 @@ const App = createApp({
             const api = `${this.apiUrl}/admin/signin`;
             axios.post(api, this.user).then((res) => {
                 const { token, expired } = res.data;
-                document.cookie = `henToken=${token};expires=${new Date(expired)};path=/;`;
+                document.cookie = `hexToken=${token};expires=${new Date(expired)};path=/;`;
                 window.location = "./Products.html";
             }).catch((err) => {
                 alert(err.data.message);
