@@ -83,8 +83,7 @@ const App = createApp({
             keyboard: false
         });
         // 取出 Token
-        const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
-        axios.defaults.headers.common.Authorization = token;
+        axios.defaults.headers.common.Authorization = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
 
         this.checkLogin()
     }
