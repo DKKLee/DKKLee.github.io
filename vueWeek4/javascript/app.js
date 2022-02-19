@@ -12,7 +12,6 @@ const App = createApp({
     },
     methods: {
         Login() {
-            console.log('Login');
             const api = `${this.apiUrl}/admin/signin`;
             axios.post(api, this.user).then((res) => {
                 const { token, expired } = res.data;

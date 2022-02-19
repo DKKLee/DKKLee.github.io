@@ -50,17 +50,17 @@
             </tbody>
         </table>
         <!-- 分頁元件 -->
-        <pagination :pages="pagination" @emit-pages="getData"></pagination>
+        <pagination-conponent :pages="pagination" @emit-pages="getData"></pagination-conponent>
         <!-- 分頁元件 -->
 
         <!-- Modal -->
-        <product-modal ref="product" :product="tempProduct"  @update="getData"></product-modal>
-        <del-product-modal ref="delProduct" :product="tempProduct" @update="getData"></del-product-modal>
+        <product-conponent ref="product" :product="tempProduct"  @update-data="updateData"></product-conponent>
+        <delProduct-conponentl ref="delProduct" :product="tempProduct" @del-data="delData"></delproduct-conponentl>
         <!-- Modal -->
     </div>
 
     <!-- 分頁模板 -->
-    <script type="text/x-template" id="pagination">
+    <!-- <script type="text/x-template" id="pagination">
         <nav aria-label="Page navigation example">
           <ul class="pagination">
             <li
@@ -108,9 +108,9 @@
             </li>
           </ul>
         </nav>
-    </script>
+    </script> -->
     <!-- 新增/編輯模板 -->
-    <script type="text/x-template" id="productModal">
+    <!-- <script type="text/x-template" id="productModal">
         <div id="productModal" ref="productModal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content border-0">
@@ -225,9 +225,9 @@
                 </div>
             </div>
         </div>
-    </script>
+    </script> -->
     <!-- 刪除模板 -->
-    <script type="text/x-template" id="delProductModal">
+    <!-- <script type="text/x-template" id="delProductModal">
         <div id="delProductModal" ref="delProductModal" class="modal fade" tabindex="-1" aria-labelledby="delProductModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content border-0">
@@ -252,7 +252,7 @@
                 </div>
             </div>
         </div>
-     </script>
+     </script> -->
 
 
 
@@ -266,7 +266,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
         integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
         crossorigin="anonymous"></script>
-    <script type="module" src="./javascript//products.js"></script>
+    <script type="module" src="./javascript/products.js"></script>
 </body>
 
 </html>
