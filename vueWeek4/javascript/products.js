@@ -61,6 +61,7 @@ const App = createApp({
         },
         updateData() {
             //新增/編輯資料
+            //調整編輯資料指更新單一資料
             let httpmethod = this.tempProduct.id ? 'put' : 'post';
             let api = `${apiUrl}/api/${apiPath}/admin/product`;
             api += this.tempProduct.id ? `/${this.tempProduct.id}` : '';
