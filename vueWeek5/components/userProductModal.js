@@ -24,6 +24,7 @@ export default {
     },
     methods: {
         openModal() {
+            this.qty = 1;
             this.modal.show();
         },
         hideModal() {
