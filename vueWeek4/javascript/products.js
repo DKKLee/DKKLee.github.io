@@ -41,11 +41,22 @@ const App = createApp({
             const api = `${apiUrl}/api/${apiPath}/admin/products?page=${page}`;
             axios.get(api).then((res) => {
                 const { products, pagination } = res.data;
+                console.log(products);
                 this.products = products;
                 this.pagination = pagination;
             }).catch((err) => {
                 alert(err.data);
                 window.location = 'index.html';
+            });
+        },
+        updatastate(item){
+            item.is_enabled = !item.is_enabled;
+            console.log(item.id);
+            let api = `${apiUrl}/api/${apiPath}/admin/product/${item.id}`;
+            axios.put(api, { data: item }).then((res) => {
+              
+            }).catch((err) => {
+                alert(err.data.message);
             });
         },
         updateData() {
@@ -54,12 +65,15 @@ const App = createApp({
             let api = `${apiUrl}/api/${apiPath}/admin/product`;
             api += this.tempProduct.id ? `/${this.tempProduct.id}` : '';
             axios[httpmethod](api, { data: this.tempProduct }).then((res) => {
-                this.products.forEach((item,index) => {
-                    if(item.id === this.tempProduct.id){
-                        this.products[index] = {...this.tempProduct};
-                    }
-                }) ;
-                //this.getData();
+                if(this.tempProduct.id ){
+                    this.products.forEach((item,index) => {
+                        if(item.id === this.tempProduct.id){
+                            this.products[index] = {...this.tempProduct};
+                        }
+                    }) ;
+                }else{
+                    this.getData(); 
+                }
                 productModal.hide();
             }).catch((err) => {
                 alert(err.data.message);
