@@ -104,7 +104,6 @@ const App = createApp({
                 this.tempProduct = { ...item };
                 delProductModal.show();
             }
-
         }
     },
     mounted() {
