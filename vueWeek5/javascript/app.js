@@ -2,13 +2,14 @@ import userProductModal from '../components/userProductModal.js';
 import paginationConponent from "../components/pagination.js";
 
 const { defineRule, Form, Field, ErrorMessage, configure } = VeeValidate;
-const { required, email, min, max } = VeeValidateRules;
+const { required, email, min, max, regex } = VeeValidateRules;
 const { localize, loadLocaleFromURL } = VeeValidateI18n;
 
 defineRule('required', required);
 defineRule('email', email);
 defineRule('min', min);
 defineRule('max', max);
+defineRule('regex', regex);
 
 loadLocaleFromURL('zh_TW.json');
 
@@ -137,6 +138,7 @@ Vue.createApp({
       axios.post(url, { data: order }).then((response) => {
         alert(response.data.message);
         this.$refs.form.resetForm();
+        this.form.message = '';
         this.getCart();
       }).catch((err) => {
         alert(err.data.message);
