@@ -176,7 +176,7 @@ window.verifyAdmin = function () {
   const input = document.getElementById("adminPass").value;
   if (input === adminPassword) {
     document.getElementById("resetSection").style.display = "block";
-    input = "";
+    document.getElementById("adminPass").value = "";
     alert("✅ 主持人登入成功！");
   } else {
     alert("❌ 密碼錯誤！");
