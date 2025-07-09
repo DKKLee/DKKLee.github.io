@@ -61,10 +61,11 @@
 <!-- 遊戲畫面 -->
 <div id="gameScreen" style="display: none;">
   <h3>目前點擊次數</h3>
-  <p>🐰 兔子：<span id="rabbitCount">0</span></p>
-  <p>🐢 烏龜：<span id="turtleCount">0</span></p>
-  <p>🐒 猴子：<span id="monkeyCount">0</span></p>
-
+  <div style="white-space:nowrap;">
+ 🐰 兔子：<span id="rabbitCount">0</span> 
+ 🐢 烏龜：<span id="turtleCount">0</span></p>
+  🐒 猴子：<span id="monkeyCount">0</span>
+</div>
   <!-- 玩家控制區塊（只顯示選擇的角色） -->
   <div class="animal-container" id="playerControl" style="margin-top: 2rem;"></div>
 </div>
@@ -175,6 +176,7 @@ window.verifyAdmin = function () {
   const input = document.getElementById("adminPass").value;
   if (input === adminPassword) {
     document.getElementById("resetSection").style.display = "block";
+    input = "";
     alert("✅ 主持人登入成功！");
   } else {
     alert("❌ 密碼錯誤！");
@@ -185,7 +187,11 @@ window.resetCounts = function () {
   animals.forEach(animal => {
     const countRef = ref(db, animal);
     set(countRef, 0);
+    const animalLockRef = ref(db, `selectedAnimals/${animal}`);
+    set(animalLockRef, false); // 鎖定角色
+
   });
+  
   document.getElementById("resetSection").style.display = "none";
 
   alert("🎉 所有點擊次數已重置！");
