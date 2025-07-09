@@ -67,6 +67,15 @@
     <button onclick="clickAnimal('monkey')">點猴子</button>
   </div>
 
+<div style="margin-top: 2rem;">
+  <input type="password" id="adminPass" placeholder="輸入主持人密碼" />
+  <button onclick="verifyAdmin()">登入主持人</button>
+</div>
+
+<div id="resetSection" style="display: none; margin-top: 1rem;">
+  <button onclick="resetCounts()" style="background-color: #f44336;">🔁 重置比賽</button>
+</div>
+
   <script type="module">
     // ✅ 替換成你的 Firebase 設定
     const firebaseConfig = {
@@ -106,6 +115,27 @@
       el.classList.add('bounce');
       setTimeout(() => el.classList.remove('bounce'), 200);
     };
+
+    const adminPassword = "lee"; // 🔑 你可以改成你想要的密碼
+
+window.verifyAdmin = function () {
+  const input = document.getElementById("adminPass").value;
+  if (input === adminPassword) {
+    document.getElementById("resetSection").style.display = "block";
+    alert("✅ 主持人登入成功！");
+  } else {
+    alert("❌ 密碼錯誤！");
+  }
+};
+
+window.resetCounts = function () {
+  animals.forEach(animal => {
+    const countRef = ref(db, animal);
+    set(countRef, 0);
+  });
+  alert("🎉 所有點擊次數已重置！");
+};
+
   </script>
 </body>
 </html>
