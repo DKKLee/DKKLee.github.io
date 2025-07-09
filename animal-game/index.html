@@ -48,7 +48,7 @@
   </style>
 </head>
 <body>
-    <h1>🐾 動物點擊競賽 🐾</h1>
+    <h1 onclick="verifyArea()">🐾 動物點擊競賽 🐾</h1>
 
  <div id="selectScreen">
   <h2>請選擇你的動物角色</h2>
@@ -70,7 +70,7 @@
   <div class="animal-container" id="playerControl" style="margin-top: 2rem;"></div>
 </div>
 
-<div style="margin-top: 2rem;">
+<div id="verifyArea" style="display: none;margin-top: 2rem;">
   <input type="password" id="adminPass" placeholder="輸入主持人密碼" />
   <button onclick="verifyAdmin()">登入主持人</button>
 </div>
@@ -99,7 +99,7 @@
     const db = getDatabase(app);
 
     const animals = ['rabbit', 'turtle', 'monkey'];
-
+    let verifyAreaint = 0;
     animals.forEach(animal => {
       const countRef = ref(db, animal);
       onValue(countRef, (snapshot) => {
@@ -183,6 +183,14 @@ window.verifyAdmin = function () {
   }
 };
 
+window.verifyArea = function(){
+  verifyAreaint +=1;
+  if(verifyAreaint >= 3){
+    document.getElementById("verifyArea").style.display = "block";
+    verifyAreaint = 0;
+  }
+}
+
 window.resetCounts = function () {
   animals.forEach(animal => {
     const countRef = ref(db, animal);
@@ -193,6 +201,7 @@ window.resetCounts = function () {
   });
   
   document.getElementById("resetSection").style.display = "none";
+  document.getElementById("verifyArea").style.display = "none";
 
   alert("🎉 所有點擊次數已重置！");
 };
