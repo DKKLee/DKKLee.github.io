@@ -49,23 +49,25 @@
 </head>
 <body>
     <h1>🐾 動物點擊競賽 🐾</h1>
-  <div class="animal-container">
-    <div id="rabbit" class="animal">🐰</div>
-    <div class="counter">兔子點擊次數：<span id="rabbitCount">0</span></div>
-    <button onclick="clickAnimal('rabbit')">點兔子</button>
-  </div>
 
-  <div class="animal-container">
-    <div id="turtle" class="animal">🐢</div>
-    <div class="counter">烏龜點擊次數：<span id="turtleCount">0</span></div>
-    <button onclick="clickAnimal('turtle')">點烏龜</button>
-  </div>
+ <div id="selectScreen">
+  <h2>請選擇你的動物角色</h2>
+  <button id="btn-rabbit" onclick="selectAnimal('rabbit')">🐰 兔子</button>
+  <button id="btn-turtle" onclick="selectAnimal('turtle')">🐢 烏龜</button>
+  <button id="btn-monkey" onclick="selectAnimal('monkey')">🐒 猴子</button>
+</div>
 
-  <div class="animal-container">
-    <div id="monkey" class="animal">🐒</div>
-    <div class="counter">猴子點擊次數：<span id="monkeyCount">0</span></div>
-    <button onclick="clickAnimal('monkey')">點猴子</button>
-  </div>
+
+<!-- 遊戲畫面 -->
+<div id="gameScreen" style="display: none;">
+  <h3>目前點擊次數</h3>
+  <p>🐰 兔子：<span id="rabbitCount">0</span></p>
+  <p>🐢 烏龜：<span id="turtleCount">0</span></p>
+  <p>🐒 猴子：<span id="monkeyCount">0</span></p>
+
+  <!-- 玩家控制區塊（只顯示選擇的角色） -->
+  <div class="animal-container" id="playerControl" style="margin-top: 2rem;"></div>
+</div>
 
 <div style="margin-top: 2rem;">
   <input type="password" id="adminPass" placeholder="輸入主持人密碼" />
@@ -104,6 +106,57 @@
       });
     });
 
+   window.selectAnimal = function (animal) {
+  const animalLockRef = ref(db, `selectedAnimals/${animal}`);
+  set(animalLockRef, true); // 鎖定角色
+
+  document.getElementById("selectScreen").style.display = "none";
+  document.getElementById("gameScreen").style.display = "block";
+
+  const controlDiv = document.getElementById("playerControl");
+  controlDiv.innerHTML = `
+    <div id="${animal}" class="animal">${getAnimalEmoji(animal)}</div>
+    <button onclick="clickAnimal('${animal}')">點 ${getAnimalName(animal)}</button>
+  `;
+};
+
+
+// 輔助函式：取得動物 emoji
+function getAnimalEmoji(animal) {
+  return {
+    rabbit: "🐰",
+    turtle: "🐢",
+    monkey: "🐒"
+  }[animal];
+}
+
+// 輔助函式：取得動物中文名稱
+function getAnimalName(animal) {
+  return {
+    rabbit: "兔子",
+    turtle: "烏龜",
+    monkey: "猴子"
+  }[animal];
+}
+
+ const selectedRef = ref(db, 'selectedAnimals');
+
+onValue(selectedRef, (snapshot) => {
+  const selected = snapshot.val() || {};
+  ['rabbit', 'turtle', 'monkey'].forEach(animal => {
+    const btn = document.getElementById(`btn-${animal}`);
+    if (btn) {
+      if (selected[animal]) {
+        btn.disabled = true;
+        btn.textContent = `${getAnimalEmoji(animal)} ${getAnimalName(animal)}（已被選擇）`;
+      } else {
+        btn.disabled = false;
+        btn.textContent = `${getAnimalEmoji(animal)} ${getAnimalName(animal)}`;
+      }
+    }
+  });
+});
+
     window.clickAnimal = function(animal) {
       const countRef = ref(db, animal);
       onValue(countRef, (snapshot) => {
@@ -133,6 +186,8 @@ window.resetCounts = function () {
     const countRef = ref(db, animal);
     set(countRef, 0);
   });
+  document.getElementById("resetSection").style.display = "none";
+
   alert("🎉 所有點擊次數已重置！");
 };
 
