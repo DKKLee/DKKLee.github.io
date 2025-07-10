@@ -244,6 +244,19 @@ function PhoneShake(animal){
     const shakeThreshold = 15; // 加速度閾值
     const shakeCooldown = 1000; // 每次搖晃間隔（毫秒）
 
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              
+            } else {
+              alert('請允許感應器權限以啟用搖晃偵測');
+            }
+          })
+          .catch(err => {
+            console.error('權限請求失敗:', err);
+          });
+    }
     window.addEventListener('devicemotion', (event) => {
       const acc = event.accelerationIncludingGravity;
       const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
