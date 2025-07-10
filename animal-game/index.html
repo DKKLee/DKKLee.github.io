@@ -230,7 +230,7 @@
           if (parseInt(snapshot.val()) > MaxCount) {
             MaxCount = snapshot.val();
             winner = animal;
-          }else if(snapshot.val() == MaxCount){
+          }else if(parseInt(snapshot.val()) >= 1 && snapshot.val() == MaxCount){
             winner = `, ${animal}`;
           }
         });
