@@ -241,8 +241,8 @@ function showWinner() {
 function PhoneShake(animal){
     // 📱 手機搖晃偵測
     let lastShakeTime = 0;
-    const shakeThreshold = 15; // 加速度閾值
-    const shakeCooldown = 500; // 每次搖晃間隔（毫秒）
+    const shakeThreshold = 10; // 加速度閾值
+    const shakeCooldown = 1000; // 每次搖晃間隔（毫秒）
 
     window.addEventListener('devicemotion', (event) => {
       const acc = event.accelerationIncludingGravity;
