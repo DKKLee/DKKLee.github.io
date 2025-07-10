@@ -287,6 +287,9 @@ function PhoneShake(animal){
       typeof DeviceMotionEvent.requestPermission === 'function') {
     DeviceMotionEvent.requestPermission().then(state => {
       if (state === 'granted') {
+        let lastShakeTime = 0;
+    const shakeThreshold = 15; // 加速度閾值
+    const shakeCooldown = 1000; // 每次搖晃間隔（毫秒）
         window.addEventListener('devicemotion', (event) => {
           console.log('感應器資料：', event.accelerationIncludingGravity);
           const acc = event.accelerationIncludingGravity;
