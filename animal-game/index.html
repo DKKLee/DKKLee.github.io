@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>動物點擊競賽</title>
   <style>
     body {
@@ -12,22 +13,27 @@
       margin: 0;
       padding: 2rem;
     }
+
     h1 {
       color: #333;
     }
+
     .animal-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin: 1.5rem 0;
     }
+
     .animal {
       font-size: 5rem;
       transition: transform 0.2s ease;
     }
+
     .bounce {
       transform: scale(1.3);
     }
+
     button {
       padding: 0.6rem 1.2rem;
       font-size: 1rem;
@@ -38,62 +44,78 @@
       color: white;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #45a049;
     }
+
     .counter {
       font-size: 1.2rem;
       margin-top: 0.3rem;
     }
+
+    #winner {
+      font-size: 2rem;
+      margin-top: 2rem;
+      color: #d2691e;
+    }
+
+    #countdown {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
+
 <body>
-    <h1 onclick="verifyArea()">🐾 動物點擊競賽 🐾</h1>
+  <h1 onclick="verifyArea()">🐾 動物點擊競賽 🐾</h1>
+  <div id="countdown">等待開始...</div>
+  <div id="selectScreen">
+    <h2>請選擇你的動物角色</h2>
+    <button id="btn-rabbit" onclick="selectAnimal('rabbit')">🐰 兔子</button>
+    <button id="btn-turtle" onclick="selectAnimal('turtle')">🐢 烏龜</button>
+    <button id="btn-monkey" onclick="selectAnimal('monkey')">🐒 猴子</button>
+  </div>
 
- <div id="selectScreen">
-  <h2>請選擇你的動物角色</h2>
-  <button id="btn-rabbit" onclick="selectAnimal('rabbit')">🐰 兔子</button>
-  <button id="btn-turtle" onclick="selectAnimal('turtle')">🐢 烏龜</button>
-  <button id="btn-monkey" onclick="selectAnimal('monkey')">🐒 猴子</button>
-</div>
 
+  <!-- 遊戲畫面 -->
+  <div id="gameScreen" style="display: none;">
+    <h3>目前點擊次數</h3>
+    <div style="white-space:nowrap;">
+      🐰 兔子：<span id="rabbitCount">0</span>
+      🐢 烏龜：<span id="turtleCount">0</span>
+      🐒 猴子：<span id="monkeyCount">0</span>
+    </div>
+    <!-- 玩家控制區塊（只顯示選擇的角色） -->
+    <div class="animal-container" id="playerControl" style="margin-top: 2rem;"></div>
+  </div>
+  <div id="winner"></div>
 
-<!-- 遊戲畫面 -->
-<div id="gameScreen" style="display: none;">
-  <h3>目前點擊次數</h3>
-  <div style="white-space:nowrap;">
- 🐰 兔子：<span id="rabbitCount">0</span> 
- 🐢 烏龜：<span id="turtleCount">0</span>
-  🐒 猴子：<span id="monkeyCount">0</span>
-</div>
-  <!-- 玩家控制區塊（只顯示選擇的角色） -->
-  <div class="animal-container" id="playerControl" style="margin-top: 2rem;"></div>
-</div>
+  <div id="verifyArea" style="display: none;margin-top: 2rem;">
+    <input type="password" id="adminPass" placeholder="輸入主持人密碼" />
+    <button onclick="verifyAdmin()">登入主持人</button>
+  </div>
 
-<div id="verifyArea" style="display: none;margin-top: 2rem;">
-  <input type="password" id="adminPass" placeholder="輸入主持人密碼" />
-  <button onclick="verifyAdmin()">登入主持人</button>
-</div>
-
-<div id="resetSection" style="display: none; margin-top: 1rem;">
-  <button onclick="resetCounts()" style="background-color: #f44336;">🔁 重置比賽</button>
-</div>
+  <div id="resetSection" style="display: none; margin-top: 1rem;">
+    <button id="startBtn" onclick="startGame()">🎬 開始遊戲</button>
+    <button onclick="resetCounts()" style="background-color: #f44336;">🔁 重置比賽</button>
+  </div>
 
   <script type="module">
     // ✅ 替換成你的 Firebase 設定
     const firebaseConfig = {
-    apiKey: "AIzaSyBRLyJTY0TqEKtkQ0LAjF5BtenNHHUQ52k",
-    authDomain: "animal-game-d7461.firebaseapp.com",
-    projectId: "animal-game-d7461",
-    storageBucket: "animal-game-d7461.firebasestorage.app",
-    messagingSenderId: "857022080536",
-    appId: "1:857022080536:web:69813a9bac56f0b386056d",
-    measurementId: "G-29G94QDX9E"
-  };
+      apiKey: "AIzaSyBRLyJTY0TqEKtkQ0LAjF5BtenNHHUQ52k",
+      authDomain: "animal-game-d7461.firebaseapp.com",
+      projectId: "animal-game-d7461",
+      storageBucket: "animal-game-d7461.firebasestorage.app",
+      messagingSenderId: "857022080536",
+      appId: "1:857022080536:web:69813a9bac56f0b386056d",
+      measurementId: "G-29G94QDX9E"
+    };
 
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -107,58 +129,113 @@
       });
     });
 
-   window.selectAnimal = function (animal) {
-  const animalLockRef = ref(db, `selectedAnimals/${animal}`);
-  set(animalLockRef, true); // 鎖定角色
+    window.selectAnimal = function (animal) {
+      const animalLockRef = ref(db, `selectedAnimals/${animal}`);
+      set(animalLockRef, true); // 鎖定角色
 
-  document.getElementById("selectScreen").style.display = "none";
-  document.getElementById("gameScreen").style.display = "block";
+      document.getElementById("selectScreen").style.display = "none";
+      document.getElementById("gameScreen").style.display = "block";
 
-  const controlDiv = document.getElementById("playerControl");
-  controlDiv.innerHTML = `
+      const controlDiv = document.getElementById("playerControl");
+      controlDiv.innerHTML = `
     <div id="${animal}" class="animal">${getAnimalEmoji(animal)}</div>
     <button onclick="clickAnimal('${animal}')">點 ${getAnimalName(animal)}</button>
   `;
-};
+    };
 
 
-// 輔助函式：取得動物 emoji
-function getAnimalEmoji(animal) {
-  return {
-    rabbit: "🐰",
-    turtle: "🐢",
-    monkey: "🐒"
-  }[animal];
-}
-
-// 輔助函式：取得動物中文名稱
-function getAnimalName(animal) {
-  return {
-    rabbit: "兔子",
-    turtle: "烏龜",
-    monkey: "猴子"
-  }[animal];
-}
-
- const selectedRef = ref(db, 'selectedAnimals');
-
-onValue(selectedRef, (snapshot) => {
-  const selected = snapshot.val() || {};
-  ['rabbit', 'turtle', 'monkey'].forEach(animal => {
-    const btn = document.getElementById(`btn-${animal}`);
-    if (btn) {
-      if (selected[animal]) {
-        btn.disabled = true;
-        btn.textContent = `${getAnimalEmoji(animal)} ${getAnimalName(animal)}（已被選擇）`;
-      } else {
-        btn.disabled = false;
-        btn.textContent = `${getAnimalEmoji(animal)} ${getAnimalName(animal)}`;
-      }
+    // 輔助函式：取得動物 emoji
+    function getAnimalEmoji(animal) {
+      return {
+        rabbit: "🐰",
+        turtle: "🐢",
+        monkey: "🐒"
+      }[animal];
     }
-  });
-});
 
-    window.clickAnimal = function(animal) {
+    // 輔助函式：取得動物中文名稱
+    function getAnimalName(animal) {
+      return {
+        rabbit: "兔子",
+        turtle: "烏龜",
+        monkey: "猴子"
+      }[animal];
+    }
+    // 開始遊戲
+    window.startGame = function() {
+      update(ref(db), {
+        "game/status": "running",
+        "game/countdown": 10,
+        "selectedAnimals/rabbit": false,
+        "selectedAnimals/turtle": false,
+        "selectedAnimals/monkey": false
+      });
+
+      let timeLeft = 10;
+      const interval = setInterval(() => {
+        timeLeft--;
+        update(ref(db), { "game/countdown": timeLeft });
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          update(ref(db), { "game/status": "ended" });
+        }
+      }, 1000);
+    }
+
+    // 監聽遊戲狀態與倒數
+    onValue(ref(db, "game"), (snapshot) => {
+      const game = snapshot.val();
+      const countdownEl = document.getElementById("countdown");
+      if (!game) return;
+
+      if (game.status === "running") {
+        countdownEl.innerText = `倒數：${game.countdown} 秒`;
+      } else if (game.status === "ended") {
+        countdownEl.innerText = "遊戲結束！";
+        showWinner();
+      } else {
+        countdownEl.innerText = "等待開始...";
+        document.getElementById("winner").innerText = "";
+        document.getElementById("selectScreen").style.display = "block";
+        document.getElementById("gameScreen").style.display = "none";
+      }
+    });
+
+    const selectedRef = ref(db, 'selectedAnimals');
+
+    onValue(selectedRef, (snapshot) => {
+      const selected = snapshot.val() || {};
+      ['rabbit', 'turtle', 'monkey'].forEach(animal => {
+        const btn = document.getElementById(`btn-${animal}`);
+        if (btn) {
+          if (selected[animal]) {
+            btn.disabled = true;
+            btn.textContent = `${getAnimalEmoji(animal)} ${getAnimalName(animal)}（已被選擇）`;
+          } else {
+            btn.disabled = false;
+            btn.textContent = `${getAnimalEmoji(animal)} ${getAnimalName(animal)}`;
+          }
+        }
+      });
+    });
+
+     // 顯示獲勝者
+function showWinner() {
+  let MaxCount = 0;
+  let winner;
+  animals.forEach(animal => {
+      const countRef = ref(db, animal);
+      onValue(countRef, (snapshot) => {
+        if(parseInt(snapshot.val()) > MaxCount){
+          winner = animal;
+        }
+      });
+    });
+    document.getElementById("winner").innerText = `🎉 獲勝的是：${winner}`;
+}
+
+
+    window.clickAnimal = function (animal) {
       const countRef = ref(db, animal);
       onValue(countRef, (snapshot) => {
         const current = snapshot.val() || 0;
@@ -172,40 +249,47 @@ onValue(selectedRef, (snapshot) => {
 
     const adminPassword = "lee"; // 🔑 你可以改成你想要的密碼
 
-window.verifyAdmin = function () {
-  const input = document.getElementById("adminPass").value;
-  if (input === adminPassword) {
-    document.getElementById("resetSection").style.display = "block";
-    document.getElementById("adminPass").value = "";
-    alert("✅ 主持人登入成功！");
-  } else {
-    alert("❌ 密碼錯誤！");
-  }
-};
+    window.verifyAdmin = function () {
+      const input = document.getElementById("adminPass").value;
+      if (input === adminPassword) {
+        document.getElementById("resetSection").style.display = "block";
+        document.getElementById("adminPass").value = "";
+        alert("✅ 主持人登入成功！");
+      } else {
+        alert("❌ 密碼錯誤！");
+      }
+    };
 
-window.verifyArea = function(){
-  verifyAreaint +=1;
-  if(verifyAreaint >= 3){
-    document.getElementById("verifyArea").style.display = "block";
-    verifyAreaint = 0;
-  }
-}
+    window.verifyArea = function () {
+      verifyAreaint += 1;
+      if (verifyAreaint >= 3) {
+        document.getElementById("verifyArea").style.display = "block";
+        verifyAreaint = 0;
+      }
+    }
 
-window.resetCounts = function () {
-  animals.forEach(animal => {
-    const countRef = ref(db, animal);
-    set(countRef, 0);
-    const animalLockRef = ref(db, `selectedAnimals/${animal}`);
-    set(animalLockRef, false); // 鎖定角色
+    window.resetCounts = function () {
+      animals.forEach(animal => {
+        const countRef = ref(db, animal);
+        set(countRef, 0);
+        // const animalLockRef = ref(db, `selectedAnimals/${animal}`);
+        // set(animalLockRef, false); // 鎖定角色
+        
+      });
+       update(ref(db), {
+        "game/status": "waiting",
+        "game/countdown": 10,
+        "selectedAnimals/rabbit": false,
+        "selectedAnimals/turtle": false,
+        "selectedAnimals/monkey": false
+      });
+      document.getElementById("resetSection").style.display = "none";
+      document.getElementById("verifyArea").style.display = "none";
 
-  });
-  
-  document.getElementById("resetSection").style.display = "none";
-  document.getElementById("verifyArea").style.display = "none";
-
-  alert("🎉 所有點擊次數已重置！");
-};
+      alert("🎉 所有點擊次數已重置！");
+    };
 
   </script>
 </body>
+
 </html>
