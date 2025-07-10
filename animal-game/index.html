@@ -189,6 +189,7 @@
       if (!game) return;
 
       if (game.status === "running") {
+        requestMotionPermission();
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].style.display = "block";
         countdownEl.innerText = `倒數：${game.countdown} 秒`;
       } else if (game.status === "ended") {
@@ -250,12 +251,46 @@ function PhoneShake(animal){
       const now = Date.now();
       if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
         const cA = document.getElementsByClassName("clickAnimal");
-        if(cA.length > 0 && cA[0].style.display != "none") clickAnimal(animal)
+        // if(cA.length > 0 && cA[0].style.display != "none") clickAnimal(animal)
+        clickAnimal(animal);
         lastShakeTime = now;
       }
     });
 }
     
+// 📱 搖晃偵測邏輯
+    function handleShake(event) {
+      const acc = event.accelerationIncludingGravity;
+      const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+      const now = Date.now();
+      if (accTotal > 15 && now - lastShakeTime > 1000) {
+        updateCount();
+        lastShakeTime = now;
+      }
+    }
+
+// 啟用感應器權限（iOS 需要）
+    function requestMotionPermission() {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              window.addEventListener('devicemotion', handleShake);
+              permissionBtn.style.display = 'none';
+            } else {
+              alert('請允許感應器權限以啟用搖晃偵測');
+            }
+          })
+          .catch(err => {
+            console.error('權限請求失敗:', err);
+          });
+      } else {
+        // Android 或不需授權的瀏覽器
+        window.addEventListener('devicemotion', handleShake);
+        permissionBtn.style.display = 'none';
+      }
+    }
+
 
     window.clickAnimal = function (animal) {
       const countRef = ref(db, animal);
