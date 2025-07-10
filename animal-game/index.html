@@ -139,7 +139,7 @@
       const controlDiv = document.getElementById("playerControl");
       controlDiv.innerHTML = `
     <div id="${animal}" class="animal">${getAnimalEmoji(animal)}</div>
-    <button onclick="clickAnimal('${animal}')">點 ${getAnimalName(animal)}</button>
+    <button class="clickAnimal" style="display: none;" onclick="clickAnimal('${animal}')">點 ${getAnimalName(animal)}</button>
   `;
     };
 
@@ -189,9 +189,11 @@
       if (!game) return;
 
       if (game.status === "running") {
+       if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].style.display = "block";
         countdownEl.innerText = `倒數：${game.countdown} 秒`;
       } else if (game.status === "ended") {
         countdownEl.innerText = "遊戲結束！";
+       if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].remove();
         showWinner();
       } else {
         countdownEl.innerText = "等待開始...";
@@ -227,6 +229,7 @@ function showWinner() {
       const countRef = ref(db, animal);
       onValue(countRef, (snapshot) => {
         if(parseInt(snapshot.val()) > MaxCount){
+          MaxCount = snapshot.val();
           winner = animal;
         }
       });
