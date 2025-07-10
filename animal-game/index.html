@@ -189,7 +189,6 @@
       if (!game) return;
 
       if (game.status === "running") {
-        requestMotionPermission();
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].style.display = "block";
         countdownEl.innerText = `倒數：${game.countdown} 秒`;
       } else if (game.status === "ended") {
@@ -225,7 +224,7 @@
      // 顯示獲勝者
 function showWinner() {
   let MaxCount = 0;
-  let winner;
+  let winner = "";
   animals.forEach(animal => {
       const countRef = ref(db, animal);
       onValue(countRef, (snapshot) => {
@@ -243,8 +242,11 @@ function PhoneShake(animal){
   let lastShakeTime = 0;
     const shakeThreshold = 1; // 加速度閾值
     const shakeCooldown = 1; // 每次搖晃間隔（毫秒）
-
-    window.addEventListener('devicemotion', (event) => {
+if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+             window.addEventListener('devicemotion', (event) => {
       const acc = event.accelerationIncludingGravity;
       const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
 
@@ -256,17 +258,53 @@ function PhoneShake(animal){
         lastShakeTime = now;
       }
     });
+            } else {
+              alert('請允許感應器權限以啟用搖晃偵測');
+            }
+          })
+          .catch(err => {
+            console.error('權限請求失敗:', err);
+          });
+      } else {
+        // Android 或不需授權的瀏覽器
+        window.addEventListener('devicemotion', (event) => {
+      const acc = event.accelerationIncludingGravity;
+      const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+
+      const now = Date.now();
+      if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
+        const cA = document.getElementsByClassName("clickAnimal");
+        // if(cA.length > 0 && cA[0].style.display != "none") clickAnimal(animal)
+        clickAnimal(animal);
+        lastShakeTime = now;
+      }
+    });
+      }
+    
 }
     
 // 📱 搖晃偵測邏輯
-    function handleShake(event) {
+       function handleShake(event) {
       const acc = event.accelerationIncludingGravity;
-      const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
-      const now = Date.now();
-      if (accTotal > 15 && now - lastShakeTime > 1000) {
-        updateCount();
-        lastShakeTime = now;
+      if (!acc.x || !acc.y || !acc.z) return;
+
+      if (lastX !== null) {
+        const deltaX = Math.abs(acc.x - lastX);
+        const deltaY = Math.abs(acc.y - lastY);
+        const deltaZ = Math.abs(acc.z - lastZ);
+
+        const totalDelta = deltaX + deltaY + deltaZ;
+
+        const now = Date.now();
+        if (totalDelta > shakeThreshold && now - lastShakeTime > shakeCooldown) {
+          updateCount();
+          lastShakeTime = now;
+        }
       }
+
+      lastX = acc.x;
+      lastY = acc.y;
+      lastZ = acc.z;
     }
 
 // 啟用感應器權限（iOS 需要）
