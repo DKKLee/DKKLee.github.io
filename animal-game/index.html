@@ -280,8 +280,7 @@ function PhoneShake(animal){
     // });
 }
 
-  const acc = event.accelerationIncludingGravity;
-  const total = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
+  
   DeviceMotionEvent.requestPermission().then(state => {
   if (state === 'granted') {
     // 添加事件監聽
