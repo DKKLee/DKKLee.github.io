@@ -239,24 +239,40 @@ function showWinner() {
 
 // 📱 手機搖晃偵測
 function PhoneShake(animal){
-    let lastGyroTime = 0;
-    const gyroThreshold = 4.0; // 角速度門檻（rad/s）
-    const gyroCooldown = 1000; // 每次搖動間隔（毫秒）
-
+    // 📱 手機搖晃偵測
+    let lastShakeTime = 0;
+    const shakeThreshold = 15; // 加速度閾值
+    const shakeCooldown = 1000; // 每次搖晃間隔（毫秒）
 
     window.addEventListener('devicemotion', (event) => {
-      const rotation = event.rotationRate;
-      if (!rotation || rotation.alpha === null) return;
+      const acc = event.accelerationIncludingGravity;
+      const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
 
       const now = Date.now();
-      const totalRotation = Math.abs(rotation.alpha) + Math.abs(rotation.beta) + Math.abs(rotation.gamma);
-
-      if (totalRotation > gyroThreshold && now - lastGyroTime > gyroCooldown) {
-        const ca = document.getElementsByClassName("clickAnimal");
+      if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
         if(ca.length > 0 && ca[0].style.display != "none") clickAnimal(animal);
-        lastGyroTime = now;
+        lastShakeTime = now;
       }
-    });
+
+   });
+    // let lastGyroTime = 0;
+    // const gyroThreshold = 4.0; // 角速度門檻（rad/s）
+    // const gyroCooldown = 1000; // 每次搖動間隔（毫秒）
+
+
+    // window.addEventListener('devicemotion', (event) => {
+    //   const rotation = event.rotationRate;
+    //   if (!rotation || rotation.alpha === null) return;
+
+    //   const now = Date.now();
+    //   const totalRotation = Math.abs(rotation.alpha) + Math.abs(rotation.beta) + Math.abs(rotation.gamma);
+
+    //   if (totalRotation > gyroThreshold && now - lastGyroTime > gyroCooldown) {
+    //     const ca = document.getElementsByClassName("clickAnimal");
+    //     if(ca.length > 0 && ca[0].style.display != "none") clickAnimal(animal);
+    //     lastGyroTime = now;
+    //   }
+    // });
 }
 
     window.clickAnimal = function (animal) {
