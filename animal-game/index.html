@@ -75,6 +75,8 @@
     <button id="btn-rabbit" onclick="selectAnimal('rabbit')">🐰 兔子</button>
     <button id="btn-turtle" onclick="selectAnimal('turtle')">🐢 烏龜</button>
     <button id="btn-monkey" onclick="selectAnimal('monkey')">🐒 猴子</button>
+    <button onclick="requestSensorPermission()">啟用感應器</button>
+
   </div>
 
 
@@ -189,7 +191,6 @@
       if (!game) return;
 
       if (game.status === "running") {
-        requestSensorPermission();
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].style.display = "block";
         countdownEl.innerText = `倒數：${game.countdown} 秒`;
       } else if (game.status === "ended") {
