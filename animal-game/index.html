@@ -189,9 +189,9 @@
       if (!game) return;
 
       if (game.status === "running") {
+        requestSensorPermission();
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].style.display = "block";
         countdownEl.innerText = `倒數：${game.countdown} 秒`;
-        requestSensorPermission();
       } else if (game.status === "ended") {
         countdownEl.innerText = "遊戲結束！";
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].remove();
@@ -293,6 +293,7 @@ function PhoneShake(animal){
         alert('請允許使用感應器權限');
       }
     }).catch(err => {
+      alert('授權失敗：', err);
       console.error('授權失敗：', err);
     });
   } else {
