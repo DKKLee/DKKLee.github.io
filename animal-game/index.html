@@ -280,7 +280,8 @@ function PhoneShake(animal){
     // });
 }
 
-  
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+
   DeviceMotionEvent.requestPermission().then(state => {
   if (state === 'granted') {
     // 添加事件監聽
@@ -297,7 +298,7 @@ function PhoneShake(animal){
   } else {
     alert('請允許感應器使用權限');
   }
-});
+});}
 
  
 
