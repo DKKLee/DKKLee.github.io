@@ -250,6 +250,7 @@ function PhoneShake(animal){
 
       const now = Date.now();
       if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
+        const ca = document.getElementsByClassName("clickAnimal");
         if(ca.length > 0 && ca[0].style.display != "none") {
           clickAnimal(animal);
           lastShakeTime = now;
