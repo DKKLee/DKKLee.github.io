@@ -287,8 +287,18 @@ function PhoneShake(animal){
       typeof DeviceMotionEvent.requestPermission === 'function') {
     DeviceMotionEvent.requestPermission().then(state => {
       if (state === 'granted') {
-        window.addEventListener('devicemotion', (e) => {
-          console.log('感應器資料：', e.accelerationIncludingGravity);
+        window.addEventListener('devicemotion', (event) => {
+          console.log('感應器資料：', event.accelerationIncludingGravity);
+          const acc = event.accelerationIncludingGravity;
+      const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+
+      const now = Date.now();
+      if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
+        if(ca.length > 0 && ca[0].style.display != "none") {
+          clickAnimal("rabbit");
+          lastShakeTime = now;
+        }
+      }
         });
       } else {
         alert('請允許使用感應器權限');
