@@ -191,6 +191,7 @@
       if (game.status === "running") {
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].style.display = "block";
         countdownEl.innerText = `倒數：${game.countdown} 秒`;
+        requestSensorPermission();
       } else if (game.status === "ended") {
         countdownEl.innerText = "遊戲結束！";
        if(document.getElementsByClassName("clickAnimal").length > 0) document.getElementsByClassName("clickAnimal")[0].remove();
@@ -280,25 +281,28 @@ function PhoneShake(animal){
     // });
 }
 
-  if (typeof DeviceMotionEvent.requestPermission === 'function') {
-
-  DeviceMotionEvent.requestPermission().then(state => {
-  if (state === 'granted') {
-    // 添加事件監聽
-   
-  window.addEventListener('devicemotion', (event) => {
-  const acc = event.accelerationIncludingGravity;
-  const total = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
-
-  if (total > 15) {
-    alert("11");
-    console.log('手機可能正在搖晃');
-  }
-});
+  function requestSensorPermission() {
+  if (typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(state => {
+      if (state === 'granted') {
+        window.addEventListener('devicemotion', (e) => {
+          console.log('感應器資料：', e.accelerationIncludingGravity);
+        });
+      } else {
+        alert('請允許使用感應器權限');
+      }
+    }).catch(err => {
+      console.error('授權失敗：', err);
+    });
   } else {
-    alert('請允許感應器使用權限');
+    // 非 iOS 或已支援瀏覽器
+    window.addEventListener('devicemotion', (e) => {
+      console.log('感應器資料：', e.accelerationIncludingGravity);
+    });
   }
-});}
+}
+
 
  
 
