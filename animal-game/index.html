@@ -239,69 +239,49 @@ function showWinner() {
 
 // 📱 手機搖晃偵測
 function PhoneShake(animal){
-  let lastShakeTime = 0;
-    const shakeThreshold = 1; // 加速度閾值
-    const shakeCooldown = 1; // 每次搖晃間隔（毫秒）
+    let lastGyroTime = 0;
+    const gyroThreshold = 4.0; // 角速度門檻（rad/s）
+    const gyroCooldown = 1000; // 每次搖動間隔（毫秒）
+
 
     window.addEventListener('devicemotion', (event) => {
-      const acc = event.accelerationIncludingGravity;
-      const accTotal = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+      const rotation = event.rotationRate;
+      if (!rotation || rotation.alpha === null) return;
 
       const now = Date.now();
-      if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
-        const cA = document.getElementsByClassName("clickAnimal");
-        // if(cA.length > 0 && cA[0].style.display != "none") clickAnimal(animal)
+      const totalRotation = Math.abs(rotation.alpha) + Math.abs(rotation.beta) + Math.abs(rotation.gamma);
+
+      if (totalRotation > gyroThreshold && now - lastGyroTime > gyroCooldown) {
         clickAnimal(animal);
-        lastShakeTime = now;
+        lastGyroTime = now;
       }
     });
 }
-    
-// 📱 搖晃偵測邏輯
-       function handleShake(event) {
-      const acc = event.accelerationIncludingGravity;
-      if (!acc.x || !acc.y || !acc.z) return;
 
-      if (lastX !== null) {
-        const deltaX = Math.abs(acc.x - lastX);
-        const deltaY = Math.abs(acc.y - lastY);
-        const deltaZ = Math.abs(acc.z - lastZ);
+     
 
-        const totalDelta = deltaX + deltaY + deltaZ;
-
-        const now = Date.now();
-        if (totalDelta > shakeThreshold && now - lastShakeTime > shakeCooldown) {
-          updateCount();
-          lastShakeTime = now;
-        }
-      }
-
-      lastX = acc.x;
-      lastY = acc.y;
-      lastZ = acc.z;
-    }
 
 // 啟用感應器權限（iOS 需要）
-    function requestMotionPermission() {
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission()
-          .then(permissionState => {
-            if (permissionState === 'granted') {
-              window.addEventListener('devicemotion', handleShake);
-              permissionBtn.style.display = 'none';
-            } else {
-              alert('請允許感應器權限以啟用搖晃偵測');
-            }
-          })
-          .catch(err => {
-            console.error('權限請求失敗:', err);
-          });
-      } else {
-        // Android 或不需授權的瀏覽器
-        window.addEventListener('devicemotion', handleShake);
-        permissionBtn.style.display = 'none';
-      }
-    }
+    // function requestMotionPermission() {
+    //   if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    //     DeviceMotionEvent.requestPermission()
+    //       .then(permissionState => {
+    //         if (permissionState === 'granted') {
+    //           window.addEventListener('devicemotion', handleShake);
+    //           permissionBtn.style.display = 'none';
+    //         } else {
+    //           alert('請允許感應器權限以啟用搖晃偵測');
+    //         }
+    //       })
+    //       .catch(err => {
+    //         console.error('權限請求失敗:', err);
+    //       });
+    //   } else {
+    //     // Android 或不需授權的瀏覽器
+    //     window.addEventListener('devicemotion', handleShake);
+    //     permissionBtn.style.display = 'none';
+    //   }
+    // }
 
 
     window.clickAnimal = function (animal) {
