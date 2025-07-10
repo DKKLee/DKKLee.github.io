@@ -240,8 +240,8 @@ function showWinner() {
 // 📱 手機搖晃偵測
 function PhoneShake(animal){
   let lastShakeTime = 0;
-    const shakeThreshold = 15; // 加速度閾值
-    const shakeCooldown = 1000; // 每次搖晃間隔（毫秒）
+    const shakeThreshold = 1; // 加速度閾值
+    const shakeCooldown = 1; // 每次搖晃間隔（毫秒）
 
     window.addEventListener('devicemotion', (event) => {
       const acc = event.accelerationIncludingGravity;
@@ -250,7 +250,7 @@ function PhoneShake(animal){
       const now = Date.now();
       if (accTotal > shakeThreshold && now - lastShakeTime > shakeCooldown) {
         const cA = document.getElementsByClassName("clickAnimal");
-        if(cA.length > 0 && cA.style.display != "none") clickAnimal(animal)
+        if(cA.length > 0 && cA[0].style.display != "none") clickAnimal(animal)
         lastShakeTime = now;
       }
     });
