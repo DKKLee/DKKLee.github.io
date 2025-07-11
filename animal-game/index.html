@@ -341,15 +341,18 @@
       };
     }
 
+    let currentShakeHandler = null;
+
     function requestSensorPermission(animal) {
       if (typeof DeviceMotionEvent !== 'undefined' &&
         typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().then(state => {
           if (state === 'granted') {
-            let lastShakeTime = 0;
-            const shakeThreshold = 15; // 加速度閾值
-            const shakeCooldown = 1000; // 每次搖晃間隔（毫秒）
-            window.addEventListener('devicemotion', PhoneShake(animal));
+            if (currentShakeHandler) {
+              window.removeEventListener('devicemotion', currentShakeHandler);
+            }
+            currentShakeHandler = PhoneShake(animal);
+            window.addEventListener('devicemotion', currentShakeHandler);
           } else {
             alert('請允許使用感應器權限');
           }
@@ -359,9 +362,11 @@
         });
       } else {
         // 非 iOS 或已支援瀏覽器
-        window.addEventListener('devicemotion', (e) => {
-          console.log('感應器資料：', e.accelerationIncludingGravity);
-        });
+        if (currentShakeHandler) {
+          window.removeEventListener('devicemotion', currentShakeHandler);
+        }
+        currentShakeHandler = PhoneShake(animal);
+        window.addEventListener('devicemotion', currentShakeHandler);
       }
     }
 
@@ -451,7 +456,7 @@
       } else {
         // 手動模式：顯示主持人登入區塊
         document.getElementById("resetSection").style.display = "none";
-        document.getElementById("verifyArea").style.display = "none";
+        document.getElementById("verifyArea").style.display = "block";
         // 回到初始畫面
         document.getElementById("selectScreen").style.display = "block";
         document.getElementById("gameScreen").style.display = "none";
