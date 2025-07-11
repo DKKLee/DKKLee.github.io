@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>即時抽獎名單</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 2rem; }
+    h1 { color: #333; cursor: pointer; }
+    .input-group { margin: 1rem 0; }
+    input { padding: 0.5rem; font-size: 1rem; margin: 0.3rem; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 0.6rem 1.2rem; font-size: 1rem; border: none; border-radius: 8px; background-color: #4caf50; color: white; cursor: pointer; margin: 0.5rem; }
+    button:hover { background-color: #45a049; }
+    #lotteryPanel { display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; }
+    #userList, #winnerList { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 1rem; min-width: 220px; }
+    #winnerList { min-width: 220px; }
+    .winner { color: #d2691e; font-weight: bold; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <h1 id="mainTitle">🎁 即時抽獎名單 🎁</h1>
+  <div id="inputPanel">
+    <div class="input-group">
+      <input type="text" id="nameInput" placeholder="姓名" />
+      <input type="text" id="phoneInput" placeholder="手機號碼" />
+      <button onclick="submitUser()">送出</button>
+    </div>
+    <div id="submitMsg"></div>
+  </div>
+
+  <div id="lotteryPanel" style="display:none;">
+    <div id="userList">
+      <h3>所有名單</h3>
+      <ul id="userUl"></ul>
+      <button onclick="clearAllUsers()" style="background-color:#f44336; margin-top:1rem;">清除所有名單</button>
+    </div>
+    <div>
+      <button id="drawBtn" onclick="drawWinner()">抽獎</button>
+      <canvas id="wheelCanvas" width="300" height="300" style="display:none;margin-top:1rem;"></canvas>
+    </div>
+    <div id="winnerList">
+      <h3>中獎者</h3>
+      <div id="winnerDiv"></div>
+      <button onclick="clearWinners()" style="background-color:#f44336; margin-top:1rem;">清除中獎名單</button>
+    </div>
+  </div>
+
+  <div id="adminPanel" style="display:none; margin-top:2rem;">
+    <input type="password" id="adminPass" placeholder="輸入後台密碼" />
+    <button onclick="verifyAdmin()">進後台</button>
+    <div id="adminMsg" style="color:#d2691e;"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRLyJTY0TqEKtkQ0LAjF5BtenNHHUQ52k",
+      authDomain: "animal-game-d7461.firebaseapp.com",
+      projectId: "animal-game-d7461",
+      storageBucket: "animal-game-d7461.firebasestorage.app",
+      messagingSenderId: "857022080536",
+      appId: "1:857022080536:web:69813a9bac56f0b386056d",
+      measurementId: "G-29G94QDX9E"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 前台送出資料
+    window.submitUser = function() {
+      const name = document.getElementById('nameInput').value.trim();
+      const phone = document.getElementById('phoneInput').value.trim();
+      if (!name || !phone) {
+        document.getElementById('submitMsg').innerText = '請填寫完整資料';
+        return;
+      }
+      const userRef = push(ref(db, 'lottery/users'));
+      set(userRef, { name, phone });
+      document.getElementById('submitMsg').innerText = '已送出！';
+      document.getElementById('nameInput').value = '';
+      document.getElementById('phoneInput').value = '';
+    };
+
+    // 監聽所有名單
+    let users = {};
+    onValue(ref(db, 'lottery/users'), (snapshot) => {
+      users = snapshot.val() || {};
+      renderUserList();
+    });
+
+    // 監聽所有中獎者
+    let winners = [];
+    onValue(ref(db, 'lottery/winners'), (snapshot) => {
+      winners = snapshot.val() || [];
+      renderWinnerList();
+    });
+
+    function renderUserList() {
+      const ul = document.getElementById('userUl');
+      ul.innerHTML = '';
+      Object.entries(users).forEach(([key, user]) => {
+        ul.innerHTML += `<li>${user.name} (${user.phone})</li>`;
+      });
+    }
+    function renderWinnerList() {
+      const div = document.getElementById('winnerDiv');
+      div.innerHTML = '';
+      winners.forEach(w => {
+        div.innerHTML += `<div class='winner'>${w.name} (${w.phone})</div>`;
+      });
+    }
+
+    // 清除所有名單
+    window.clearAllUsers = function() {
+      if (confirm('確定要清除所有名單與中獎者？')) {
+        set(ref(db, 'lottery/users'), null);
+        set(ref(db, 'lottery/winners'), null);
+      }
+    };
+
+    // 清除中獎名單
+    window.clearWinners = function() {
+      if (confirm('確定要清除所有中獎名單？')) {
+        set(ref(db, 'lottery/winners'), null);
+      }
+    };
+
+    // 轉盤動畫
+    function drawWheel(names, highlightIdx = null) {
+      const canvas = document.getElementById('wheelCanvas');
+      const ctx = canvas.getContext('2d');
+      const size = names.length;
+      const angle = 2 * Math.PI / size;
+      ctx.clearRect(0, 0, 300, 300);
+      for (let i = 0; i < size; i++) {
+        ctx.beginPath();
+        ctx.moveTo(150, 150);
+        ctx.arc(150, 150, 140, angle * i, angle * (i + 1));
+        ctx.closePath();
+        ctx.fillStyle = (highlightIdx === i) ? '#ffd700' : (i % 2 === 0 ? '#ffe4b5' : '#b0e0e6');
+        ctx.fill();
+        ctx.save();
+        ctx.translate(150, 150);
+        ctx.rotate(angle * (i + 0.5));
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#333';
+        ctx.font = '16px Segoe UI';
+        ctx.fillText(names[i], 90, 0);
+        ctx.restore();
+      }
+      // 畫箭頭
+      ctx.save();
+      ctx.translate(150, 150);
+      ctx.rotate(-Math.PI/2);
+      ctx.beginPath();
+      ctx.moveTo(0, -120);
+      ctx.lineTo(-15, -90);
+      ctx.lineTo(15, -90);
+      ctx.closePath();
+      ctx.fillStyle = '#d2691e';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 抽獎邏輯（動畫優化版）
+    window.drawWinner = function() {
+      const drawBtn = document.getElementById('drawBtn');
+      const canvas = document.getElementById('wheelCanvas');
+      const winnerPhones = winners.map(w => w.phone);
+      const candidates = Object.entries(users).filter(([key, user]) => !winnerPhones.includes(user.phone));
+      if (candidates.length === 0) {
+        alert('沒有可抽的人了！');
+        return;
+      }
+      const names = candidates.map(([key, user]) => user.name);
+      const winnerIdx = Math.floor(Math.random() * candidates.length);
+      canvas.style.display = 'block';
+      drawBtn.disabled = true;
+      let totalTime = 300; // 300ms快速旋轉
+      let start = null;
+      let currentAngle = 0;
+      let frameId;
+      function fastSpin(ts) {
+        if (!start) start = ts;
+        let elapsed = ts - start;
+        currentAngle = (elapsed / totalTime) * 10 * 2 * Math.PI; // 10圈
+        drawWheel(names);
+        // 旋轉canvas
+        canvas.style.transform = `rotate(${currentAngle}rad)`;
+        if (elapsed < totalTime) {
+          frameId = requestAnimationFrame(fastSpin);
+        } else {
+          // 停止，箭頭指向中獎者
+          canvas.style.transform = `rotate(${-(winnerIdx * (2 * Math.PI / names.length))})`;
+          drawWheel(names, winnerIdx);
+          setTimeout(() => {
+            const [key, user] = candidates[winnerIdx];
+            winners.push(user);
+            set(ref(db, 'lottery/winners'), winners);
+            canvas.style.display = 'none';
+            canvas.style.transform = '';
+            drawBtn.disabled = false;
+          }, 1200);
+        }
+      }
+      requestAnimationFrame(fastSpin);
+    };
+
+    const adminPassword = "lee"; // 你可以自訂密碼
+
+    window.verifyAdmin = function() {
+      const input = document.getElementById("adminPass").value;
+      if (input === adminPassword) {
+        document.getElementById("adminPanel").style.display = "none";
+        document.getElementById("lotteryPanel").style.display = "flex";
+        document.getElementById("adminPass").value = "";
+        document.getElementById("adminMsg").innerText = "";
+      } else {
+        document.getElementById("adminMsg").innerText = "密碼錯誤！";
+      }
+    };
+
+    // 標題點三下切換後台（加密碼驗證）
+    let titleClickCount = 0;
+    document.getElementById('mainTitle').onclick = function() {
+      titleClickCount++;
+      if (titleClickCount >= 3) {
+        document.getElementById('inputPanel').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('lotteryPanel').style.display = 'none';
+        titleClickCount = 0;
+      }
+    };
+  </script>
+</body>
+</html>
