@@ -99,6 +99,9 @@
   <div id="resetSection" style="display: none; margin-top: 1rem;">
     <button id="startBtn" onclick="startGame()">🎬 開始遊戲</button>
     <button onclick="resetCounts()" style="background-color: #f44336;">🔁 重置比賽</button>
+    <label style="margin-left:1rem;">
+      <input type="checkbox" id="autoModeCheckbox" /> 自動模式
+    </label>
   </div>
 
   <script type="module">
@@ -218,7 +221,86 @@
           }
         }
       });
+      checkAutoStart();
     });
+
+    let autoMode = false;
+    const modeRef = ref(db, 'mode');
+    onValue(modeRef, (snapshot) => {
+      autoMode = !!snapshot.val();
+    });
+
+    function checkAutoStart() {
+      if (!autoMode) return;
+      onValue(selectedRef, (snapshot) => {
+        const selected = snapshot.val() || {};
+        const allSelected = animals.every(animal => selected[animal]);
+        if (allSelected) {
+          document.getElementById("selectScreen").style.display = "none";
+          document.getElementById("gameScreen").style.display = "block";
+          let countdown = 3;
+          document.getElementById("countdown").innerText = `遊戲即將開始：${countdown} 秒`;
+          const preStart = setInterval(() => {
+            countdown--;
+            document.getElementById("countdown").innerText = `遊戲即將開始：${countdown} 秒`;
+            if (countdown <= 0) {
+              clearInterval(preStart);
+              autoStartGame();
+            }
+          }, 1000);
+        }
+      });
+    }
+
+    function autoStartGame() {
+      update(ref(db), {
+        "game/status": "running",
+        "game/countdown": 10,
+        "selectedAnimals/rabbit": true,
+        "selectedAnimals/turtle": true,
+        "selectedAnimals/monkey": true
+      });
+      let timeLeft = 10;
+      const interval = setInterval(() => {
+        timeLeft--;
+        update(ref(db), { "game/countdown": timeLeft });
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          update(ref(db), { "game/status": "ended" });
+          setTimeout(() => {
+            showWinner();
+            autoResetToSelect();
+          }, 1000);
+        }
+      }, 1000);
+    }
+
+    function autoResetToSelect() {
+      let countdown = 3;
+      document.getElementById("countdown").innerText = `即將回到選擇畫面：${countdown} 秒`;
+      const resetTimer = setInterval(() => {
+        countdown--;
+        document.getElementById("countdown").innerText = `即將回到選擇畫面：${countdown} 秒`;
+        if (countdown <= 0) {
+          clearInterval(resetTimer);
+          animals.forEach(animal => {
+            set(ref(db, animal), 0);
+            set(ref(db, `selectedAnimals/${animal}`), false);
+          });
+          update(ref(db), {
+            "game/status": "waiting",
+            "game/countdown": 10,
+            "selectedAnimals/rabbit": false,
+            "selectedAnimals/turtle": false,
+            "selectedAnimals/monkey": false
+          });
+          document.getElementById("winner").innerText = "";
+          document.getElementById("selectScreen").style.display = "block";
+          document.getElementById("gameScreen").style.display = "none";
+          document.getElementById("countdown").innerText = "等待開始...";
+        }
+      }, 1000);
+    }
 
     // 顯示獲勝者
     function showWinner() {
@@ -336,6 +418,59 @@
 
       alert("🎉 所有點擊次數已重置！");
     };
+
+    // Checkbox 讀取與更新 mode 參數
+    function updateAutoModeCheckbox() {
+      const checkbox = document.getElementById('autoModeCheckbox');
+      if (!checkbox) return;
+      checkbox.checked = autoMode;
+      checkbox.onchange = function() {
+        set(ref(db, 'mode'), checkbox.checked);
+      };
+    }
+
+    // 當 resetSection 顯示時，更新 Checkbox 狀態
+    const resetSectionObserver = new MutationObserver(() => {
+      const resetSection = document.getElementById('resetSection');
+      if (resetSection && resetSection.style.display !== 'none') {
+        updateAutoModeCheckbox();
+      }
+    });
+    resetSectionObserver.observe(document.body, { childList: true, subtree: true });
+
+    // mode 參數變動時同步 Checkbox 並調整流程
+    onValue(modeRef, (snapshot) => {
+      autoMode = !!snapshot.val();
+      updateAutoModeCheckbox();
+      if (autoMode) {
+        // 自動模式：隱藏主持人相關區塊
+        document.getElementById("resetSection").style.display = "none";
+        document.getElementById("verifyArea").style.display = "none";
+        // 若三個動物已選，直接進入自動流程
+        checkAutoStart();
+      } else {
+        // 手動模式：顯示主持人登入區塊
+        document.getElementById("resetSection").style.display = "none";
+        document.getElementById("verifyArea").style.display = "none";
+        // 回到初始畫面
+        document.getElementById("selectScreen").style.display = "block";
+        document.getElementById("gameScreen").style.display = "none";
+        document.getElementById("winner").innerText = "";
+        document.getElementById("countdown").innerText = "等待開始...";
+        // 重設所有選擇
+        animals.forEach(animal => {
+          set(ref(db, animal), 0);
+          set(ref(db, `selectedAnimals/${animal}`), false);
+        });
+        update(ref(db), {
+          "game/status": "waiting",
+          "game/countdown": 10,
+          "selectedAnimals/rabbit": false,
+          "selectedAnimals/turtle": false,
+          "selectedAnimals/monkey": false
+        });
+      }
+    });
 
   </script>
 </body>
