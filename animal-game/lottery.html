@@ -8,13 +8,22 @@
     body { font-family: "Segoe UI", sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 2rem; }
     h1 { color: #333; cursor: pointer; }
     .input-group { margin: 1rem 0; }
-    input { padding: 0.5rem; font-size: 1rem; margin: 0.3rem; border-radius: 6px; border: 1px solid #ccc; }
+    input { padding: 0.5rem; font-size: 1rem; margin: 0.3rem; border-radius: 6px; border: 1px solid #ccc; max-width: 90vw; }
     button { padding: 0.6rem 1.2rem; font-size: 1rem; border: none; border-radius: 8px; background-color: #4caf50; color: white; cursor: pointer; margin: 0.5rem; }
     button:hover { background-color: #45a049; }
-    #lotteryPanel { display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; }
-    #userList, #winnerList { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 1rem; min-width: 220px; }
+    #lotteryPanel { display: flex; flex-direction: row; justify-content: center; gap: 2rem; margin-top: 2rem; }
+    #userList, #winnerList { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 1rem; min-width: 220px; max-width: 95vw; }
     #winnerList { min-width: 220px; }
     .winner { color: #d2691e; font-weight: bold; margin: 0.5rem 0; }
+    #wheelCanvas { max-width: 90vw; height: auto; }
+    @media (max-width: 600px) {
+      body { padding: 0.5rem; }
+      #lotteryPanel { flex-direction: column; align-items: center; gap: 1rem; }
+      #userList, #winnerList { min-width: unset; width: 95vw; margin: 0 auto; }
+      #wheelCanvas { width: 95vw !important; height: auto !important; }
+      .input-group { flex-direction: column; }
+      input, button { width: 90vw; box-sizing: border-box; margin: 0.3rem auto; }
+    }
   </style>
 </head>
 <body>
@@ -49,6 +58,12 @@
     <input type="password" id="adminPass" placeholder="輸入後台密碼" />
     <button onclick="verifyAdmin()">進後台</button>
     <div id="adminMsg" style="color:#d2691e;"></div>
+  </div>
+
+  <!-- 煙火遮罩 -->
+  <div id="winnerMask" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center;flex-direction:column;">
+    <canvas id="fireworkCanvas" width="400" height="400" style="max-width:90vw;max-height:60vh;"></canvas>
+    <div id="maskWinnerName" style="color:#ffd700;font-size:2rem;margin-top:2rem;"></div>
   </div>
 
   <script type="module">
@@ -163,7 +178,55 @@
       ctx.restore();
     }
 
-    // 抽獎邏輯（動畫優化版）
+    // 煙火動畫
+    function fireworkAnimation(canvas, duration = 3000) {
+      const ctx = canvas.getContext('2d');
+      const particles = [];
+      const colors = ['#ffd700','#ff69b4','#00bfff','#adff2f','#ff4500'];
+      function createFirework() {
+        const x = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+        const y = Math.random() * canvas.height * 0.5 + canvas.height * 0.2;
+        for (let i = 0; i < 30; i++) {
+          const angle = (2 * Math.PI * i) / 30;
+          const speed = Math.random() * 2 + 2;
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1,
+            color: colors[Math.floor(Math.random()*colors.length)]
+          });
+        }
+      }
+      let lastTime = Date.now();
+      function animate() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if (Math.random() < 0.05) createFirework();
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.97;
+          p.vy *= 0.97;
+          p.alpha *= 0.96;
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, 2*Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        // 移除消失的粒子
+        for (let i = particles.length-1; i >=0; i--) {
+          if (particles[i].alpha < 0.05) particles.splice(i,1);
+        }
+        if (Date.now() - lastTime < duration) {
+          requestAnimationFrame(animate);
+        }
+      }
+      animate();
+    }
+
+    // 抽獎邏輯（動畫優化+遮罩）
     window.drawWinner = function() {
       const drawBtn = document.getElementById('drawBtn');
       const canvas = document.getElementById('wheelCanvas');
@@ -186,21 +249,32 @@
         let elapsed = ts - start;
         currentAngle = (elapsed / totalTime) * 10 * 2 * Math.PI; // 10圈
         drawWheel(names);
-        // 旋轉canvas
         canvas.style.transform = `rotate(${currentAngle}rad)`;
         if (elapsed < totalTime) {
           frameId = requestAnimationFrame(fastSpin);
         } else {
-          // 停止，箭頭指向中獎者
           canvas.style.transform = `rotate(${-(winnerIdx * (2 * Math.PI / names.length))})`;
           drawWheel(names, winnerIdx);
           setTimeout(() => {
+            // 顯示遮罩+煙火
             const [key, user] = candidates[winnerIdx];
-            winners.push(user);
-            set(ref(db, 'lottery/winners'), winners);
-            canvas.style.display = 'none';
-            canvas.style.transform = '';
-            drawBtn.disabled = false;
+            const mask = document.getElementById('winnerMask');
+            const fireCanvas = document.getElementById('fireworkCanvas');
+            document.getElementById('maskWinnerName').innerText = '';
+            mask.style.display = 'flex';
+            fireworkAnimation(fireCanvas, 3000);
+            setTimeout(() => {
+              document.getElementById('maskWinnerName').innerText = `🎉 恭喜 ${user.name} (${user.phone}) 🎉`;
+            }, 1800);
+            setTimeout(() => {
+              mask.style.display = 'none';
+              document.getElementById('maskWinnerName').innerText = '';
+              winners.push(user);
+              set(ref(db, 'lottery/winners'), winners);
+              canvas.style.display = 'none';
+              canvas.style.transform = '';
+              drawBtn.disabled = false;
+            }, 3000);
           }, 1200);
         }
       }
