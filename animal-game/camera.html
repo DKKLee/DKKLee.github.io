@@ -8,7 +8,7 @@
     body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
     #cameraWrap { position: relative; display: inline-block; }
     #video { width: 90vw; max-width: 400px; border-radius: 12px; }
-    #overlayImg { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%); pointer-events: none; }
+    #overlayImg { position: absolute; right: 10px; bottom: 10px; left: auto; top: auto; width: 120px; height: 120px; pointer-events: none; }
     #canvas { display: none; margin-top: 1rem; border-radius: 12px; }
     #btns { margin-top: 1.5rem; }
     button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
@@ -52,18 +52,22 @@
 
     // 拍照合成
     takePhotoBtn.onclick = function() {
-      canvas.width = video.videoWidth || 400;
-      canvas.height = video.videoHeight || 400;
+      // 以 video 寬高為主，canvas 跟 video 同比例
+      const vw = video.videoWidth || 400;
+      const vh = video.videoHeight || 400;
+      canvas.width = vw;
+      canvas.height = vh;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      // 疊加 overlay
+      ctx.drawImage(video, 0, 0, vw, vh);
+      // 疊加 overlay，右下角距離 10px
       const img = new Image();
       img.src = overlayImg.src;
       img.onload = function() {
-        // 置中 overlay
-        const ow = overlayImg.width;
-        const oh = overlayImg.height;
-        ctx.drawImage(img, (canvas.width-ow)/2, (canvas.height-oh)/2, ow, oh);
+        let ow = overlayImg.naturalWidth;
+        let oh = overlayImg.naturalHeight;
+        if (ow > vw/1.5) { ow = vw/2; }
+        if (oh > vh/1.5) { oh = vh/2; }
+        ctx.drawImage(img, vw-ow-10, vh-oh-10, ow, oh);
         canvas.style.display = 'block';
         btns.style.display = 'none';
         resultBtns.style.display = 'block';
@@ -77,6 +81,9 @@
       a.href = url;
       a.download = 'photo.png';
       a.click();
+      setTimeout(() => {
+        alert('圖片已下載，請到手機下載資料夾或相簿查看');
+      }, 500);
     };
     // 回主畫面
     backBtn.onclick = function() {
