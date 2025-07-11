@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>手機拍照合成</title>
+  <style>
+    body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
+    #cameraWrap { position: relative; display: inline-block; }
+    #video { width: 90vw; max-width: 400px; border-radius: 12px; }
+    #overlayImg { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%); pointer-events: none; }
+    #canvas { display: none; margin-top: 1rem; border-radius: 12px; }
+    #btns { margin-top: 1.5rem; }
+    button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
+    button:hover { background: #388e3c; }
+  </style>
+</head>
+<body>
+  <h2>手機拍照合成</h2>
+  <div id="cameraWrap">
+    <video id="video" autoplay playsinline></video>
+    <img id="overlayImg" src="overlay.png" alt="overlay" />
+  </div>
+  <div id="btns">
+    <button id="takePhotoBtn">拍照</button>
+  </div>
+  <canvas id="canvas" width="400" height="400"></canvas>
+  <div id="resultBtns" style="display:none;">
+    <button id="downloadBtn">下載圖片</button>
+    <button id="backBtn">回主畫面</button>
+  </div>
+  <script>
+    const video = document.getElementById('video');
+    const overlayImg = document.getElementById('overlayImg');
+    const canvas = document.getElementById('canvas');
+    const takePhotoBtn = document.getElementById('takePhotoBtn');
+    const btns = document.getElementById('btns');
+    const resultBtns = document.getElementById('resultBtns');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    // 啟動相機
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        video.srcObject = stream;
+      } catch (err) {
+        alert('無法開啟相機：' + err);
+      }
+    }
+    startCamera();
+
+    // 拍照合成
+    takePhotoBtn.onclick = function() {
+      canvas.width = video.videoWidth || 400;
+      canvas.height = video.videoHeight || 400;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // 疊加 overlay
+      const img = new Image();
+      img.src = overlayImg.src;
+      img.onload = function() {
+        // 置中 overlay
+        const ow = overlayImg.width;
+        const oh = overlayImg.height;
+        ctx.drawImage(img, (canvas.width-ow)/2, (canvas.height-oh)/2, ow, oh);
+        canvas.style.display = 'block';
+        btns.style.display = 'none';
+        resultBtns.style.display = 'block';
+      };
+    };
+
+    // 下載圖片
+    downloadBtn.onclick = function() {
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'photo.png';
+      a.click();
+    };
+    // 回主畫面
+    backBtn.onclick = function() {
+      canvas.style.display = 'none';
+      btns.style.display = 'block';
+      resultBtns.style.display = 'none';
+    };
+  </script>
+</body>
+</html>
