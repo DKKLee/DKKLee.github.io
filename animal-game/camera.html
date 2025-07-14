@@ -59,13 +59,20 @@
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, vw, vh);
-      // 疊加 overlay，右下角距離 10px
+      // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
+      const videoRect = video.getBoundingClientRect();
+      const overlayRect = overlayImg.getBoundingClientRect();
+      // 計算 overlay 在 canvas 上的座標與尺寸
+      const scaleX = vw / videoRect.width;
+      const scaleY = vh / videoRect.height;
+      const ow = overlayRect.width * scaleX;
+      const oh = overlayRect.height * scaleY;
+      const ox = (overlayRect.left - videoRect.left) * scaleX;
+      const oy = (overlayRect.top - videoRect.top) * scaleY;
       const img = new Image();
       img.src = overlayImg.src;
       img.onload = function() {
-        let ow = Math.min(overlayImg.naturalWidth, vw/1.05, 240);
-        let oh = Math.min(overlayImg.naturalHeight, vh/1.05, 240);
-        ctx.drawImage(img, vw-ow-10, vh-oh-10, ow, oh);
+        ctx.drawImage(img, ox, oy, ow, oh);
         canvas.style.display = 'block';
         btns.style.display = 'none';
         resultBtns.style.display = 'block';
