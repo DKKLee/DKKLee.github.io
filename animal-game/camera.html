@@ -1,68 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>手機拍照合成</title>
   <style>
-    body {
-      font-family: Segoe UI, sans-serif;
-      background: #f0f8ff;
-      text-align: center;
-      margin: 0;
-      padding: 1rem;
-    }
-
-    #cameraWrap {
-      position: relative;
-      display: inline-block;
-    }
-
-    #video {
-      width: 90vw;
-      max-width: 400px;
-      border-radius: 12px;
-    }
-
-    #overlayImg {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      left: auto;
-      top: auto;
-      width: auto;
-      height: 240px;
-      pointer-events: none;
-    }
-
-    #canvas {
-      display: none;
-      margin-top: 1rem;
-      border-radius: 12px;
-    }
-
-    #btns {
-      margin-top: 1.5rem;
-    }
-
-    button {
-      padding: 0.7rem 1.5rem;
-      font-size: 1.1rem;
-      border-radius: 8px;
-      border: none;
-      background: #4caf50;
-      color: #fff;
-      margin: 0.5rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #388e3c;
-    }
+    body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
+    #cameraWrap { position: relative; display: inline-block; }
+    #video { width: 90vw; max-width: 400px; border-radius: 12px; }
+    #overlayImg { position: absolute; right: 10px; bottom: 10px; left: auto; top: auto; width: auto; height: 240px; pointer-events: none; }
+    #canvas { display: none; margin-top: 1rem; border-radius: 12px; }
+    #btns { margin-top: 1.5rem; }
+    button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
+    button:hover { background: #388e3c; }
   </style>
 </head>
-
 <body>
   <h2>手機拍照合成</h2>
   <div id="cameraWrap">
@@ -99,7 +51,7 @@
     startCamera();
 
     // 拍照合成
-    takePhotoBtn.onclick = function () {
+    takePhotoBtn.onclick = function() {
       // 以 video 寬高為主，canvas 跟 video 同比例
       const vw = video.videoWidth || 400;
       const vh = video.videoHeight || 400;
@@ -119,49 +71,61 @@
       const oy = (overlayRect.top - videoRect.top) * scaleY;
       const img = new Image();
       img.src = overlayImg.src;
-      img.onload = function () {
+      img.onload = function() {
         ctx.drawImage(img, ox, oy, ow, oh);
-        canvas.style.display = 'block';
+        // 產生 base64 圖片
+        const url = canvas.toDataURL('image/png');
+        let resultImg = document.getElementById('resultImg');
+        if (!resultImg) {
+          resultImg = document.createElement('img');
+          resultImg.id = 'resultImg';
+          resultImg.style = 'width:90vw;max-width:400px;border-radius:12px;margin-top:1rem;display:block;';
+          resultImg.alt = '合成圖片';
+          resultBtns.parentNode.insertBefore(resultImg, resultBtns);
+        }
+        resultImg.src = url;
+        resultImg.style.display = 'block';
+        canvas.style.display = 'none';
         btns.style.display = 'none';
         resultBtns.style.display = 'block';
+        // 顯示提示
+        let tip = document.getElementById('saveTip');
+        if (!tip) {
+          tip = document.createElement('div');
+          tip.id = 'saveTip';
+          tip.innerText = '長按圖片可儲存到相簿';
+          tip.style = 'color:#388e3c;font-size:1.1rem;margin:0.5rem 0;';
+          resultImg.parentNode.insertBefore(tip, resultImg.nextSibling);
+        } else {
+          tip.style.display = 'block';
+        }
       };
     };
 
     // 下載圖片
-    downloadBtn.onclick = function () {
-      let catchimage = document.getElementById("canvas");
-      catchimage.toBlob(
-        function (blob) {
-          // 下載圖片
-          let link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = "photo.png";
-          link.click();
-          setTimeout(() => {
-            alert('圖片已下載，請到手機下載資料夾或相簿查看');
-          }, 500);
-        },
-        "image/png",
-        1
-      );
-
-
-      // const url = canvas.toDataURL('image/png');
-      // const a = document.createElement('a');
-      // a.href = url;
-      // a.download = 'photo.png';
-      // a.click();
-      // setTimeout(() => {
-      //   alert('圖片已下載，請到手機下載資料夾或相簿查看');
-      // }, 500);
+    downloadBtn.onclick = function() {
+      // 下載 resultImg 的圖片
+      const resultImg = document.getElementById('resultImg');
+      if (resultImg && resultImg.src) {
+        const a = document.createElement('a');
+        a.href = resultImg.src;
+        a.download = 'photo.png';
+        a.click();
+        setTimeout(() => {
+          alert('圖片已下載，請到手機下載資料夾或相簿查看');
+        }, 500);
+      }
     };
     // 回主畫面
-    backBtn.onclick = function () {
+    backBtn.onclick = function() {
       canvas.style.display = 'none';
       btns.style.display = 'block';
       resultBtns.style.display = 'none';
+      const resultImg = document.getElementById('resultImg');
+      if (resultImg) resultImg.style.display = 'none';
+      const tip = document.getElementById('saveTip');
+      if (tip) tip.style.display = 'none';
     };
   </script>
 </body>
-
 </html>
