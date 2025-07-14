@@ -5,7 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>手機拍照合成</title>
   <style>
-    body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
+    body {
+      font-family: Segoe UI, sans-serif;
+      background: linear-gradient(120deg, #e0f7fa 0%, #f0f8ff 60%, #ffe0f7 100%);
+      min-height: 100vh;
+      text-align: center;
+      margin: 0;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 10% 20%, #b2ebf2 0px, transparent 120px),
+        radial-gradient(circle at 80% 10%, #b3e5fc 0px, transparent 160px),
+        radial-gradient(circle at 50% 80%, #81d4fa 0px, transparent 180px),
+        radial-gradient(circle at 90% 70%, #e1bee7 0px, transparent 120px),
+        radial-gradient(circle at 30% 60%, #fffde7 0px, transparent 100px),
+        linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.0) 100%);
+      opacity: 0.55;
+      animation: bgGlow 6s ease-in-out infinite alternate;
+    }
+    @keyframes bgGlow {
+      0% { opacity: 0.55; }
+      100% { opacity: 0.75; }
+    }
+    .star {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0%, #fff8 60%, transparent 100%);
+      opacity: 0.7;
+      animation: starTwinkle 2.5s infinite alternate, starFloat 12s linear infinite;
+    }
+    @keyframes starTwinkle {
+      0% { opacity: 0.7; transform: scale(1) rotate(0deg); }
+      100% { opacity: 1; transform: scale(1.3) rotate(20deg); }
+    }
+    @keyframes starFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-40px); }
+    }
+    .title-animate {
+      animation: titleGlow 2.2s infinite alternate;
+    }
+    @keyframes titleGlow {
+      0% { text-shadow:0 2px 12px #fff8,0 0 24px #b2ebf2; color:#4caf50; }
+      100% { text-shadow:0 4px 24px #fff,0 0 36px #81d4fa; color:#388e3c; }
+    }
+    .result-animate {
+      animation: resultPop 0.7s cubic-bezier(.4,2,.3,1);
+    }
+    @keyframes resultPop {
+      0% { opacity:0; transform:scale(0.7) translateY(-40px); }
+      60% { opacity:1; transform:scale(1.08) translateY(0); }
+      100% { opacity:1; transform:scale(1) translateY(0); }
+    }
+    #cameraWrap, #resultBtns, #canvas {
+      position: relative;
+      z-index: 1;
+    }
     #cameraWrap { position: relative; display: inline-block; }
     #video { width: 90vw; max-width: 480px; height: auto; border-radius: 12px; }
     #overlayImg { position: absolute; right: 6px; bottom: 6px; left: auto; top: auto; width: auto; height: 240px; pointer-events: none; }
@@ -16,7 +81,21 @@
   </style>
 </head>
 <body>
-  <h2>手機拍照合成</h2>
+  <script>
+  // 動態生成星光粒子
+  for (let i = 0; i < 18; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 8 + 6;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = (Math.random() * 100) + 'vw';
+    star.style.top = (Math.random() * 100) + 'vh';
+    star.style.animationDelay = (Math.random() * 2) + 's';
+    document.body.appendChild(star);
+  }
+  </script>
+  <h2 class="title-animate" style="letter-spacing:2px;font-weight:600;color:#4caf50;text-shadow:0 2px 12px #fff8,0 0 24px #b2ebf2;">手機拍照合成</h2>
   <div id="cameraWrap" style="position:relative;">
     <video id="video" autoplay playsinline style="cursor:pointer;"></video>
     <img id="overlayImg" src="overlay.png" alt="overlay" style="cursor:pointer;" />
@@ -65,7 +144,7 @@ function doTakePhoto() {
     if (!resultImg) {
       resultImg = document.createElement('img');
       resultImg.id = 'resultImg';
-      resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;opacity:0;transform:translateY(-40px);transition:all 0.6s cubic-bezier(.4,2,.3,1);';
+      resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;';
       resultImg.alt = '合成圖片';
       // 顯示在 resultBtns 區塊下方
       if (resultBtns.nextSibling) {
@@ -77,14 +156,13 @@ function doTakePhoto() {
     // 每次拍照都覆蓋圖片
     resultImg.src = url;
     resultImg.style.display = 'block';
-    resultImg.style.opacity = '0';
-    resultImg.style.transform = 'translateY(-40px)';
+    resultImg.classList.remove('result-animate');
+    void resultImg.offsetWidth;
+    resultImg.classList.add('result-animate');
     setTimeout(() => {
-      resultImg.style.opacity = '1';
-      resultImg.style.transform = 'translateY(0)';
       // 平滑滾動到 resultImg
       resultImg.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+    }, 400);
     canvas.style.display = 'none';
     resultBtns.style.display = 'block';
     // 顯示提示
