@@ -8,7 +8,7 @@
     body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
     #cameraWrap { position: relative; display: inline-block; }
     #video { width: 90vw; max-width: 480px; height: 480px; border-radius: 12px; }
-    #overlayImg { position: absolute; right: 4px; bottom: 4px; left: auto; top: auto; width: auto; height: 480px; pointer-events: none; }
+    #overlayImg { position: absolute; right: 0px; bottom: 0px; left: auto; top: auto; width: auto; height: 480px; pointer-events: none; }
     #canvas { display: none; margin-top: 1rem; border-radius: 12px; max-width:480px; max-height:480px; }
     #btns { margin-top: 1.5rem; }
     button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
@@ -72,8 +72,8 @@
         const ow = overlayHeight * ratio;
         const oh = overlayHeight;
         // 右下角座標
-      const ox = vw - ow - 4; // right:4px
-      const oy = vh - oh - 4; // bottom:4px
+      const ox = vw - ow; // right:0px
+      const oy = vh - oh; // bottom:0px
         ctx.drawImage(imgObj, ox, oy, ow, oh);
         // 產生 base64 圖片
         const url = canvas.toDataURL('image/png');
