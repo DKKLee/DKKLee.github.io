@@ -17,18 +17,13 @@
 </head>
 <body>
   <h2>手機拍照合成</h2>
-  <div id="cameraWrap">
+  <div id="cameraWrap" style="position:relative;">
     <video id="video" autoplay playsinline style="cursor:pointer;"></video>
     <img id="overlayImg" src="overlay.png" alt="overlay" style="cursor:pointer;" />
-  </div>
-  <div id="btns">
-    <button id="takePhotoBtn">拍照</button>
+    <div id="cameraTip" style="position:absolute;left:0;right:0;bottom:12px;color:#388e3c;font-size:1.2rem;background:rgba(255,255,255,0.7);padding:0.5rem 0;border-radius:8px;">點擊畫面可拍照</div>
   </div>
   <canvas id="canvas" width="400" height="400"></canvas>
-  <div id="resultBtns" style="display:none;">
-    <button id="downloadBtn">下載圖片</button>
-    <button id="backBtn">回主畫面</button>
-  </div>
+  <div id="resultBtns" style="display:none;"></div>
   <script>
     const video = document.getElementById('video');
     const overlayImg = document.getElementById('overlayImg');
@@ -38,13 +33,14 @@
     const resultBtns = document.getElementById('resultBtns');
     const downloadBtn = document.getElementById('downloadBtn');
     const backBtn = document.getElementById('backBtn');
+    const cameraTip = document.getElementById('cameraTip');
 
     // 點擊即時影像或懸浮圖片也能拍照
     video.onclick = function() {
-      if (btns.style.display !== 'none') takePhotoBtn.click();
+      if (cameraTip.style.display !== 'none') takePhotoBtn.click();
     };
     overlayImg.onclick = function() {
-      if (btns.style.display !== 'none') takePhotoBtn.click();
+      if (cameraTip.style.display !== 'none') takePhotoBtn.click();
     };
 
     // 啟動相機
@@ -60,6 +56,8 @@
 
     // 拍照合成
     takePhotoBtn.onclick = function() {
+      // 拍照後隱藏提示
+      cameraTip.style.display = 'none';
       // 以 video 寬高為主，canvas 跟 video 同比例
       const vw = video.videoWidth || 480;
       const vh = video.videoHeight || 360;
@@ -87,7 +85,7 @@
         if (!resultImg) {
           resultImg = document.createElement('img');
           resultImg.id = 'resultImg';
-          resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;';
+          resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;opacity:0;transform:translateY(-40px);transition:all 0.6s cubic-bezier(.4,2,.3,1);';
           resultImg.alt = '合成圖片';
           // 顯示在 resultBtns 區塊下方
           if (resultBtns.nextSibling) {
@@ -98,8 +96,11 @@
         }
         resultImg.src = url;
         resultImg.style.display = 'block';
+        setTimeout(() => {
+          resultImg.style.opacity = '1';
+          resultImg.style.transform = 'translateY(0)';
+        }, 50);
         canvas.style.display = 'none';
-        btns.style.display = 'none';
         resultBtns.style.display = 'block';
         // 顯示提示
         let tip = document.getElementById('saveTip');
@@ -131,13 +132,7 @@
     };
     // 回主畫面
     backBtn.onclick = function() {
-      canvas.style.display = 'none';
-      btns.style.display = 'block';
-      resultBtns.style.display = 'none';
-      const resultImg = document.getElementById('resultImg');
-      if (resultImg) resultImg.style.display = 'none';
-      const tip = document.getElementById('saveTip');
-      if (tip) tip.style.display = 'none';
+      // 已移除主畫面功能，這裡不做任何事
     };
   </script>
 </body>
