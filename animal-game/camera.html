@@ -36,12 +36,69 @@
     const cameraTip = document.getElementById('cameraTip');
 
     // 點擊即時影像或懸浮圖片也能拍照
-    video.onclick = function() {
-      if (cameraTip.style.display !== 'none') takePhotoBtn.click();
+function doTakePhoto() {
+  if (cameraTip.style.display !== 'none') {
+    cameraTip.style.display = 'none';
+    // 以 video 寬高為主，canvas 跟 video 同比例
+    const vw = video.videoWidth || 480;
+    const vh = video.videoHeight || 360;
+    canvas.width = vw;
+    canvas.height = vh;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, vw, vh);
+    // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
+    const videoRect = video.getBoundingClientRect();
+    const overlayRect = overlayImg.getBoundingClientRect();
+    // 計算 overlay 在 canvas 上的座標與尺寸
+    const scaleX = vw / videoRect.width;
+    const scaleY = vh / videoRect.height;
+    const ow = overlayRect.width * scaleX;
+    const oh = overlayRect.height * scaleY;
+    const ox = (overlayRect.left - videoRect.left) * scaleX;
+    const oy = (overlayRect.top - videoRect.top) * scaleY;
+    const imgObj = new Image();
+    imgObj.src = overlayImg.src;
+    imgObj.onload = function() {
+      ctx.drawImage(imgObj, ox, oy, ow, oh);
+      // 產生 base64 圖片
+      const url = canvas.toDataURL('image/png');
+      let resultImg = document.getElementById('resultImg');
+      if (!resultImg) {
+        resultImg = document.createElement('img');
+        resultImg.id = 'resultImg';
+        resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;opacity:0;transform:translateY(-40px);transition:all 0.6s cubic-bezier(.4,2,.3,1);';
+        resultImg.alt = '合成圖片';
+        // 顯示在 resultBtns 區塊下方
+        if (resultBtns.nextSibling) {
+          resultBtns.parentNode.insertBefore(resultImg, resultBtns.nextSibling);
+        } else {
+          resultBtns.parentNode.appendChild(resultImg);
+        }
+      }
+      resultImg.src = url;
+      resultImg.style.display = 'block';
+      setTimeout(() => {
+        resultImg.style.opacity = '1';
+        resultImg.style.transform = 'translateY(0)';
+      }, 50);
+      canvas.style.display = 'none';
+      resultBtns.style.display = 'block';
+      // 顯示提示
+      let tip = document.getElementById('saveTip');
+      if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'saveTip';
+        tip.innerText = '長按圖片可儲存到相簿';
+        tip.style = 'color:#388e3c;font-size:1.1rem;margin:0.5rem 0;';
+        resultImg.parentNode.insertBefore(tip, resultImg.nextSibling);
+      } else {
+        tip.style.display = 'block';
+      }
     };
-    overlayImg.onclick = function() {
-      if (cameraTip.style.display !== 'none') takePhotoBtn.click();
-    };
+  }
+}
+video.onclick = doTakePhoto;
+overlayImg.onclick = doTakePhoto;
 
     // 啟動相機
     async function startCamera() {
@@ -56,64 +113,7 @@
 
     // 拍照合成
     takePhotoBtn.onclick = function() {
-      // 拍照後隱藏提示
-      cameraTip.style.display = 'none';
-      // 以 video 寬高為主，canvas 跟 video 同比例
-      const vw = video.videoWidth || 480;
-      const vh = video.videoHeight || 360;
-      canvas.width = vw;
-      canvas.height = vh;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, vw, vh);
-      // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
-      const videoRect = video.getBoundingClientRect();
-      const overlayRect = overlayImg.getBoundingClientRect();
-      // 計算 overlay 在 canvas 上的座標與尺寸
-      const scaleX = vw / videoRect.width;
-      const scaleY = vh / videoRect.height;
-      const ow = overlayRect.width * scaleX;
-      const oh = overlayRect.height * scaleY;
-      const ox = (overlayRect.left - videoRect.left) * scaleX;
-      const oy = (overlayRect.top - videoRect.top) * scaleY;
-      const imgObj = new Image();
-      imgObj.src = overlayImg.src;
-      imgObj.onload = function() {
-        ctx.drawImage(imgObj, ox, oy, ow, oh);
-        // 產生 base64 圖片
-        const url = canvas.toDataURL('image/png');
-        let resultImg = document.getElementById('resultImg');
-        if (!resultImg) {
-          resultImg = document.createElement('img');
-          resultImg.id = 'resultImg';
-          resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;opacity:0;transform:translateY(-40px);transition:all 0.6s cubic-bezier(.4,2,.3,1);';
-          resultImg.alt = '合成圖片';
-          // 顯示在 resultBtns 區塊下方
-          if (resultBtns.nextSibling) {
-            resultBtns.parentNode.insertBefore(resultImg, resultBtns.nextSibling);
-          } else {
-            resultBtns.parentNode.appendChild(resultImg);
-          }
-        }
-        resultImg.src = url;
-        resultImg.style.display = 'block';
-        setTimeout(() => {
-          resultImg.style.opacity = '1';
-          resultImg.style.transform = 'translateY(0)';
-        }, 50);
-        canvas.style.display = 'none';
-        resultBtns.style.display = 'block';
-        // 顯示提示
-        let tip = document.getElementById('saveTip');
-        if (!tip) {
-          tip = document.createElement('div');
-          tip.id = 'saveTip';
-          tip.innerText = '長按圖片可儲存到相簿';
-          tip.style = 'color:#388e3c;font-size:1.1rem;margin:0.5rem 0;';
-          resultImg.parentNode.insertBefore(tip, resultImg.nextSibling);
-        } else {
-          tip.style.display = 'block';
-        }
-      };
+      doTakePhoto();
     };
 
     // 下載圖片
