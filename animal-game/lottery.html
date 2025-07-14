@@ -119,6 +119,24 @@
       #wheelCanvas { width: 95vw !important; height: auto !important; }
       .input-group { flex-direction: column; }
       input, button { width: 90vw; box-sizing: border-box; margin: 0.3rem auto; }
+      .toggle-list-btn { display: inline-block !important; }
+    }
+    .toggle-list-btn {
+      display: inline-block;
+      font-size: 1.1rem;
+      padding: 0.2rem 0.8rem;
+      margin-left: 0.7rem;
+      border-radius: 16px;
+      background: #fffde7;
+      color: #1976d2;
+      border: 1px solid #ffd700;
+      box-shadow: 0 2px 8px #ffd70033;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .toggle-list-btn:hover {
+      background: #ffd700;
+      color: #1565c0;
     }
     #lotteryPanel {
       display: flex;
@@ -187,8 +205,11 @@
 
   <div id="lotteryPanel" style="display:none;">
     <div id="userList">
-      <h3>所有名單</h3>
-      <ul id="userUl"></ul>
+      <h3 style="margin-bottom:0.7rem;">
+        所有名單
+        <button id="toggleUserList" class="toggle-list-btn">顯示</button>
+      </h3>
+      <ul id="userUl" style="display:none;"></ul>
       <button onclick="clearAllUsers()" style="background:linear-gradient(90deg,#ffd700,#2196f3); color:#1565c0; border:2px solid #fffde7; margin-top:1rem;">清除所有名單</button>
     </div>
     <div>
@@ -196,8 +217,11 @@
       <canvas id="wheelCanvas" width="300" height="300" style="display:none;margin-top:1rem;"></canvas>
     </div>
     <div id="winnerList">
-      <h3>中獎者</h3>
-      <div id="winnerDiv"></div>
+      <h3 style="margin-bottom:0.7rem;">
+        中獎者
+        <button id="toggleWinnerList" class="toggle-list-btn">顯示</button>
+      </h3>
+      <div id="winnerDiv" style="display:none;"></div>
       <button onclick="clearWinners()" style="background:linear-gradient(90deg,#ffd700,#2196f3); color:#1565c0; border:2px solid #fffde7; margin-top:1rem;">清除中獎名單</button>
     </div>
   </div>
@@ -266,6 +290,8 @@
       Object.entries(users).forEach(([key, user]) => {
         ul.innerHTML += `<li>${user.name} (${user.phone})</li>`;
       });
+      // 保證切換按鈕可見且功能正常
+      if (typeof setupListToggles === 'function') setupListToggles();
     }
     function renderWinnerList() {
       const div = document.getElementById('winnerDiv');
@@ -273,7 +299,53 @@
       winners.forEach(w => {
         div.innerHTML += `<div class='winner'>${w.name} (${w.phone})</div>`;
       });
+      // 保證切換按鈕可見且功能正常
+      if (typeof setupListToggles === 'function') setupListToggles();
     }
+
+    // 名單/中獎者切換，手機預設收合，桌機預設展開
+    function setupListToggles() {
+      const userBtn = document.getElementById('toggleUserList');
+      const userUl = document.getElementById('userUl');
+      const winnerBtn = document.getElementById('toggleWinnerList');
+      const winnerDiv = document.getElementById('winnerDiv');
+      // 根據螢幕寬度決定初始狀態
+      if (window.innerWidth <= 600) {
+        userUl.style.display = 'none';
+        userBtn.innerText = '顯示';
+        winnerDiv.style.display = 'none';
+        winnerBtn.innerText = '顯示';
+      } else {
+        userUl.style.display = 'block';
+        userBtn.innerText = '隱藏';
+        winnerDiv.style.display = 'block';
+        winnerBtn.innerText = '隱藏';
+      }
+      userBtn.style.display = 'inline-block';
+      winnerBtn.style.display = 'inline-block';
+      // 保證父元素可見
+      userBtn.parentElement.style.display = '';
+      winnerBtn.parentElement.style.display = '';
+      userBtn.onclick = function() {
+        if (userUl.style.display === 'none') {
+          userUl.style.display = 'block';
+          userBtn.innerText = '隱藏';
+        } else {
+          userUl.style.display = 'none';
+          userBtn.innerText = '顯示';
+        }
+      };
+      winnerBtn.onclick = function() {
+        if (winnerDiv.style.display === 'none') {
+          winnerDiv.style.display = 'block';
+          winnerBtn.innerText = '隱藏';
+        } else {
+          winnerDiv.style.display = 'none';
+          winnerBtn.innerText = '顯示';
+        }
+      };
+    }
+    document.addEventListener('DOMContentLoaded', setupListToggles);
 
     // 清除所有名單
     window.clearAllUsers = function() {
