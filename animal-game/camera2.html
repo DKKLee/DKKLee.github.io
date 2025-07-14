@@ -8,7 +8,7 @@
     body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
     #cameraWrap { position: relative; display: inline-block; }
     #video { width: 90vw; max-width: 400px; border-radius: 12px; }
-    #overlayImg { position: absolute; right: 10px; bottom: 10px; width: auto; height: 240px; pointer-events: none; }
+    #overlayImg { position: absolute; right: 10px; bottom: 10px; width: auto; height: 240px; pointer-events: none; display:none; }
     #canvas { display: none; margin-top: 1rem; border-radius: 12px; }
     #btns { margin-top: 1.5rem; }
     button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
@@ -18,10 +18,11 @@
 <body>
   <h2>手機拍照合成2</h2>
   <div id="cameraWrap">
-    <video id="video" autoplay playsinline></video>
-    <img id="overlayImg" src="overlay.png" alt="overlay" />
+    <img id="previewImg" style="display:none; width:90vw; max-width:400px; border-radius:12px;" />
+    <img id="overlayImg" src="overlay.png" alt="overlay" style="position:absolute; right:10px; bottom:10px; width:auto; height:240px; pointer-events:none; display:none;" />
   </div>
   <div id="btns">
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none;" />
     <button id="takePhotoBtn">拍照</button>
   </div>
   <canvas id="canvas" width="400" height="400"></canvas>
@@ -38,40 +39,51 @@
     const resultBtns = document.getElementById('resultBtns');
     const downloadBtn = document.getElementById('downloadBtn');
     const backBtn = document.getElementById('backBtn');
+    const previewImg = document.getElementById('previewImg');
+    const fileInput = document.getElementById('fileInput');
 
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        video.srcObject = stream;
-      } catch (err) {
-        alert('無法開啟相機：' + err);
-      }
-    }
-    startCamera();
-
+    // 拍照按鈕開啟相機
     takePhotoBtn.onclick = function() {
-      const vw = video.videoWidth || 400;
-      const vh = video.videoHeight || 400;
+      fileInput.click();
+    };
+    // 拍照後顯示預覽
+    fileInput.onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      previewImg.src = url;
+      previewImg.style.display = 'block';
+      overlayImg.style.display = 'block';
+      takePhotoBtn.style.display = 'none';
+      setTimeout(() => {
+        mergePhoto();
+      }, 500); // 等圖片載入
+    };
+    // 合成圖片
+    function mergePhoto() {
+      const vw = previewImg.naturalWidth || 400;
+      const vh = previewImg.naturalHeight || 400;
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, vw, vh);
-      // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
-      const videoRect = video.getBoundingClientRect();
+      ctx.drawImage(previewImg, 0, 0, vw, vh);
+      // 取得 overlayImg 在 previewImg 上的實際顯示尺寸與位置
+      const previewRect = previewImg.getBoundingClientRect();
       const overlayRect = overlayImg.getBoundingClientRect();
-      const scaleX = vw / videoRect.width;
-      const scaleY = vh / videoRect.height;
+      const scaleX = vw / previewRect.width;
+      const scaleY = vh / previewRect.height;
       const ow = overlayRect.width * scaleX;
       const oh = overlayRect.height * scaleY;
-      const ox = (overlayRect.left - videoRect.left) * scaleX;
-      const oy = (overlayRect.top - videoRect.top) * scaleY;
+      const ox = (overlayRect.left - previewRect.left) * scaleX;
+      const oy = (overlayRect.top - previewRect.top) * scaleY;
       const img = new Image();
       img.src = overlayImg.src;
       img.onload = function() {
         ctx.drawImage(img, ox, oy, ow, oh);
         canvas.style.display = 'block';
-        btns.style.display = 'none';
         resultBtns.style.display = 'block';
+        previewImg.style.display = 'none';
+        overlayImg.style.display = 'none';
       };
     };
 
