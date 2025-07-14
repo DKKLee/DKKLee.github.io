@@ -18,8 +18,8 @@
 <body>
   <h2>手機拍照合成</h2>
   <div id="cameraWrap">
-    <video id="video" autoplay playsinline></video>
-    <img id="overlayImg" src="overlay.png" alt="overlay" />
+    <video id="video" autoplay playsinline style="cursor:pointer;"></video>
+    <img id="overlayImg" src="overlay.png" alt="overlay" style="cursor:pointer;" />
   </div>
   <div id="btns">
     <button id="takePhotoBtn">拍照</button>
@@ -38,6 +38,14 @@
     const resultBtns = document.getElementById('resultBtns');
     const downloadBtn = document.getElementById('downloadBtn');
     const backBtn = document.getElementById('backBtn');
+
+    // 點擊即時影像或懸浮圖片也能拍照
+    video.onclick = function() {
+      if (btns.style.display !== 'none') takePhotoBtn.click();
+    };
+    overlayImg.onclick = function() {
+      if (btns.style.display !== 'none') takePhotoBtn.click();
+    };
 
     // 啟動相機
     async function startCamera() {
