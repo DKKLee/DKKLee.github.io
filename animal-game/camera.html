@@ -129,7 +129,8 @@
 
     // 下載圖片
     downloadBtn.onclick = function () {
-      this.toBlob(
+      let catchimage = document.getElementById("catchimage");
+      catchimage.toBlob(
         function (blob) {
           // 下載圖片
           let link = document.createElement("a");
