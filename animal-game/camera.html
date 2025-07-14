@@ -1,20 +1,68 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>手機拍照合成</title>
   <style>
-    body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
-    #cameraWrap { position: relative; display: inline-block; }
-    #video { width: 90vw; max-width: 400px; border-radius: 12px; }
-    #overlayImg { position: absolute; right: 10px; bottom: 10px; left: auto; top: auto; width: auto; height: 240px; pointer-events: none; }
-    #canvas { display: none; margin-top: 1rem; border-radius: 12px; }
-    #btns { margin-top: 1.5rem; }
-    button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
-    button:hover { background: #388e3c; }
+    body {
+      font-family: Segoe UI, sans-serif;
+      background: #f0f8ff;
+      text-align: center;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    #cameraWrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    #video {
+      width: 90vw;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    #overlayImg {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      left: auto;
+      top: auto;
+      width: auto;
+      height: 240px;
+      pointer-events: none;
+    }
+
+    #canvas {
+      display: none;
+      margin-top: 1rem;
+      border-radius: 12px;
+    }
+
+    #btns {
+      margin-top: 1.5rem;
+    }
+
+    button {
+      padding: 0.7rem 1.5rem;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background: #4caf50;
+      color: #fff;
+      margin: 0.5rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #388e3c;
+    }
   </style>
 </head>
+
 <body>
   <h2>手機拍照合成</h2>
   <div id="cameraWrap">
@@ -51,7 +99,7 @@
     startCamera();
 
     // 拍照合成
-    takePhotoBtn.onclick = function() {
+    takePhotoBtn.onclick = function () {
       // 以 video 寬高為主，canvas 跟 video 同比例
       const vw = video.videoWidth || 400;
       const vh = video.videoHeight || 400;
@@ -71,7 +119,7 @@
       const oy = (overlayRect.top - videoRect.top) * scaleY;
       const img = new Image();
       img.src = overlayImg.src;
-      img.onload = function() {
+      img.onload = function () {
         ctx.drawImage(img, ox, oy, ow, oh);
         canvas.style.display = 'block';
         btns.style.display = 'none';
@@ -80,22 +128,39 @@
     };
 
     // 下載圖片
-    downloadBtn.onclick = function() {
-      const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'photo.png';
-      a.click();
-      setTimeout(() => {
-        alert('圖片已下載，請到手機下載資料夾或相簿查看');
-      }, 500);
+    downloadBtn.onclick = function () {
+      this.toBlob(
+        function (blob) {
+          // 下載圖片
+          let link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "photo.png";
+          link.click();
+          setTimeout(() => {
+            alert('圖片已下載，請到手機下載資料夾或相簿查看');
+          }, 500);
+        },
+        "image/png",
+        1
+      );
+
+
+      // const url = canvas.toDataURL('image/png');
+      // const a = document.createElement('a');
+      // a.href = url;
+      // a.download = 'photo.png';
+      // a.click();
+      // setTimeout(() => {
+      //   alert('圖片已下載，請到手機下載資料夾或相簿查看');
+      // }, 500);
     };
     // 回主畫面
-    backBtn.onclick = function() {
+    backBtn.onclick = function () {
       canvas.style.display = 'none';
       btns.style.display = 'block';
       resultBtns.style.display = 'none';
     };
   </script>
 </body>
+
 </html>
