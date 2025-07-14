@@ -7,7 +7,7 @@
   <style>
     body { font-family: Segoe UI, sans-serif; background: #f0f8ff; text-align: center; margin: 0; padding: 1rem; }
     #cameraWrap { position: relative; display: inline-block; }
-    #video { width: 90vw; max-width: 480px; height: 480px; border-radius: 12px; }
+    #video { width: 90vw; max-width: 480px; height: auto; border-radius: 12px; }
     #overlayImg { position: absolute; right: 6px; bottom: 6px; left: auto; top: auto; width: auto; height: 240px; pointer-events: none; }
     #canvas { display: none; margin-top: 1rem; border-radius: 12px; max-width:480px; max-height:480px; }
     #btns { margin-top: 1.5rem; }
@@ -53,27 +53,25 @@
     // 拍照合成
     takePhotoBtn.onclick = function() {
       // 以 video 寬高為主，canvas 跟 video 同比例
-      const vw = 480;
-      const vh = 480;
+      const vw = video.videoWidth || 480;
+      const vh = video.videoHeight || 360;
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, vw, vh);
       // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
-      // 直接用 CSS 設定的 right/bottom 及高度
-      const overlayHeight = 240;
-      const overlayImgEl = overlayImg;
-      // 計算 overlay 寬度（等比例）
+      const videoRect = video.getBoundingClientRect();
+      const overlayRect = overlayImg.getBoundingClientRect();
+      // 計算 overlay 在 canvas 上的座標與尺寸
+      const scaleX = vw / videoRect.width;
+      const scaleY = vh / videoRect.height;
+      const ow = overlayRect.width * scaleX;
+      const oh = overlayRect.height * scaleY;
+      const ox = (overlayRect.left - videoRect.left) * scaleX;
+      const oy = (overlayRect.top - videoRect.top) * scaleY;
       const imgObj = new Image();
-      imgObj.src = overlayImgEl.src;
+      imgObj.src = overlayImg.src;
       imgObj.onload = function() {
-        // 以原始圖片比例計算寬度
-        const ratio = imgObj.width / imgObj.height;
-        const ow = overlayHeight * ratio;
-        const oh = overlayHeight;
-        // 右下角座標
-      const ox = vw - ow - 6; // right:6px
-      const oy = vh - oh - 6; // bottom:6px
         ctx.drawImage(imgObj, ox, oy, ow, oh);
         // 產生 base64 圖片
         const url = canvas.toDataURL('image/png');
@@ -81,7 +79,7 @@
         if (!resultImg) {
           resultImg = document.createElement('img');
           resultImg.id = 'resultImg';
-          resultImg.style = 'width:90vw;max-width:480px;height:480px;border-radius:12px;margin-top:1rem;display:block;object-fit:contain;';
+          resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1rem;display:block;object-fit:contain;';
           resultImg.alt = '合成圖片';
           resultBtns.parentNode.insertBefore(resultImg, resultBtns);
         }
