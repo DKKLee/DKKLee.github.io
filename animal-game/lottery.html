@@ -114,8 +114,21 @@
     #fireworkCanvas { max-width: 90vw; height: auto; }
     @media (max-width: 600px) {
       body { padding: 0.5rem; }
-      #lotteryPanel { flex-direction: column; align-items: center; gap: 1rem; }
-      #userList, #winnerList { min-width: unset; width: 95vw; margin: 0 auto; }
+      #lotteryPanel {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1rem;
+      }
+      #userList {
+        order: 1;
+        width: 95vw;
+        margin: 0 auto;
+      }
+      #winnerList {
+        order: 2;
+        width: 95vw;
+        margin: 0 auto;
+      }
       #wheelCanvas { width: 95vw !important; height: auto !important; }
       .input-group { flex-direction: column; }
       input, button { width: 90vw; box-sizing: border-box; margin: 0.3rem auto; }
@@ -286,10 +299,15 @@
 
     function renderUserList() {
       const ul = document.getElementById('userUl');
+      // 先暫時顯示 ul，確保 scrollHeight 正確
+      const prevDisplay = ul.style.display;
+      ul.style.display = 'block';
       ul.innerHTML = '';
       Object.entries(users).forEach(([key, user]) => {
         ul.innerHTML += `<li>${user.name} (${user.phone})</li>`;
       });
+      // 還原 display 狀態
+      ul.style.display = prevDisplay;
       // 保證切換按鈕可見且功能正常
       if (typeof setupListToggles === 'function') setupListToggles();
     }
@@ -311,39 +329,119 @@
       const winnerDiv = document.getElementById('winnerDiv');
       // 根據螢幕寬度決定初始狀態
       if (window.innerWidth <= 600) {
-        userUl.style.display = 'none';
+        // 先暫時顯示 ul 以確保 scrollHeight 正確
+        userUl.style.display = 'block';
+        userUl.style.overflow = 'hidden';
+        userUl.style.maxHeight = '0px';
+        userUl.style.opacity = '0';
+        setTimeout(() => {
+          userUl.style.display = 'none';
+          userUl.style.overflow = '';
+          userUl.style.maxHeight = '';
+          userUl.style.opacity = '';
+        }, 20);
         userBtn.innerText = '顯示';
         winnerDiv.style.display = 'none';
         winnerBtn.innerText = '顯示';
       } else {
         userUl.style.display = 'block';
+        userUl.style.overflow = '';
+        userUl.style.maxHeight = '';
+        userUl.style.opacity = '';
         userBtn.innerText = '隱藏';
         winnerDiv.style.display = 'block';
         winnerBtn.innerText = '隱藏';
       }
-      userBtn.style.display = 'inline-block';
-      winnerBtn.style.display = 'inline-block';
-      // 保證父元素可見
-      userBtn.parentElement.style.display = '';
-      winnerBtn.parentElement.style.display = '';
-      userBtn.onclick = function() {
-        if (userUl.style.display === 'none') {
-          userUl.style.display = 'block';
-          userBtn.innerText = '隱藏';
-        } else {
-          userUl.style.display = 'none';
-          userBtn.innerText = '顯示';
-        }
-      };
-      winnerBtn.onclick = function() {
-        if (winnerDiv.style.display === 'none') {
-          winnerDiv.style.display = 'block';
-          winnerBtn.innerText = '隱藏';
-        } else {
-          winnerDiv.style.display = 'none';
-          winnerBtn.innerText = '顯示';
-        }
-      };
+      if (window.innerWidth <= 600) {
+        userBtn.style.display = 'inline-block';
+        winnerBtn.style.display = 'inline-block';
+        userBtn.parentElement.style.display = '';
+        winnerBtn.parentElement.style.display = '';
+      } else {
+        userBtn.style.display = 'none';
+        winnerBtn.style.display = 'none';
+        userBtn.parentElement.style.display = '';
+        winnerBtn.parentElement.style.display = '';
+      }
+      if (window.innerWidth <= 600) {
+        userBtn.onclick = function() {
+          if (userUl.style.display === 'none') {
+            userUl.style.display = 'block';
+            userUl.style.overflow = 'hidden';
+            userUl.style.maxHeight = '0px';
+            userUl.style.opacity = '0';
+            userUl.style.transition = 'max-height 0.5s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.4s';
+            setTimeout(() => {
+              userUl.style.maxHeight = userUl.scrollHeight + 'px';
+              userUl.style.opacity = '1';
+            }, 10);
+            setTimeout(() => {
+              userUl.style.maxHeight = '';
+              userUl.style.overflow = '';
+            }, 510);
+            userBtn.innerText = '隱藏';
+          } else {
+            userUl.style.overflow = 'hidden';
+            userUl.style.maxHeight = userUl.scrollHeight + 'px';
+            userUl.style.opacity = '1';
+            userUl.style.transition = 'max-height 0.5s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.4s';
+            setTimeout(() => {
+              userUl.style.maxHeight = '0px';
+              userUl.style.opacity = '0';
+            }, 10);
+            setTimeout(() => {
+              userUl.style.display = 'none';
+              userUl.style.maxHeight = '';
+              userUl.style.opacity = '';
+              userUl.style.overflow = '';
+            }, 510);
+            userBtn.innerText = '顯示';
+          }
+        };
+        winnerBtn.onclick = function() {
+          if (winnerDiv.style.display === 'none') {
+            winnerDiv.style.display = 'block';
+            winnerDiv.style.overflow = 'hidden';
+            winnerDiv.style.maxHeight = '0px';
+            winnerDiv.style.opacity = '0';
+            winnerDiv.style.transition = 'max-height 0.5s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.4s';
+            setTimeout(() => {
+              winnerDiv.style.maxHeight = winnerDiv.scrollHeight + 'px';
+              winnerDiv.style.opacity = '1';
+            }, 10);
+            setTimeout(() => {
+              winnerDiv.style.maxHeight = '';
+              winnerDiv.style.overflow = '';
+            }, 510);
+            winnerBtn.innerText = '隱藏';
+          } else {
+            winnerDiv.style.overflow = 'hidden';
+            winnerDiv.style.maxHeight = winnerDiv.scrollHeight + 'px';
+            winnerDiv.style.opacity = '1';
+            winnerDiv.style.transition = 'max-height 0.5s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.4s';
+            setTimeout(() => {
+              winnerDiv.style.maxHeight = '0px';
+              winnerDiv.style.opacity = '0';
+            }, 10);
+            setTimeout(() => {
+              winnerDiv.style.display = 'none';
+              winnerDiv.style.maxHeight = '';
+              winnerDiv.style.opacity = '';
+              winnerDiv.style.overflow = '';
+            }, 510);
+            winnerBtn.innerText = '顯示';
+          }
+        };
+      } else {
+        userUl.style.display = 'block';
+        userUl.style.overflow = '';
+        userUl.style.maxHeight = '';
+        userUl.style.opacity = '';
+        winnerDiv.style.display = 'block';
+        winnerDiv.style.overflow = '';
+        winnerDiv.style.maxHeight = '';
+        winnerDiv.style.opacity = '';
+      }
     }
     document.addEventListener('DOMContentLoaded', setupListToggles);
 
@@ -393,21 +491,61 @@
         ctx.fillText(names[i], 90, 0);
         ctx.restore();
       }
-      // 畫藍色箭頭（懸浮在正上方）
+      // 畫圓形外圍固定箭頭（#1976d2，指向圓心，固定在正上方）
       ctx.save();
       ctx.translate(150, 150);
-      ctx.rotate(-Math.PI/2); // 正上方
+      // 固定在正上方，箭頭尖端在 y = -185，底部在 y = -155
       ctx.beginPath();
-      ctx.moveTo(0, -120);
-      ctx.lineTo(-15, -90);
-      ctx.lineTo(15, -90);
+      ctx.moveTo(0, -185); // 尖端
+      ctx.lineTo(-14, -155); // 左下
+      ctx.lineTo(14, -155); // 右下
       ctx.closePath();
-      ctx.fillStyle = blueC;
-      ctx.shadowColor = blueA;
-      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#1976d2';
+      ctx.shadowColor = '#1976d2';
+      ctx.shadowBlur = 8;
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.restore();
+      // 畫 highlightIdx 扇形外徑的箭頭（含主線與三角形，外圍指向 highlightIdx 扇形中央）
+      // 只有 highlightIdx 指向 fillStyle 為 #1976d2 的扇形時才畫 highlightIdx 的箭頭
+      if (highlightIdx !== null) {
+        // 箭頭精準指向 highlightIdx 扇形中央外圍
+        ctx.save();
+        ctx.translate(150, 150);
+        const highlightAngle = angle * (highlightIdx + 0.5) ;
+        const radius = 130; // 讓箭頭更靠近圓心
+        const arrowLength = 24; // 箭頭長度縮短
+        const tipX = Math.cos(highlightAngle) * radius;
+        const tipY = Math.sin(highlightAngle) * radius;
+        const baseX = Math.cos(highlightAngle) * (radius + arrowLength);
+        const baseY = Math.sin(highlightAngle) * (radius + arrowLength);
+        ctx.beginPath();
+        ctx.moveTo(baseX, baseY);
+        ctx.lineTo(tipX, tipY);
+        ctx.strokeStyle = '#1976d2';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#1976d2';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 箭頭三角形
+        const headlen = 16;
+        const leftX = baseX - headlen * Math.cos(highlightAngle - Math.PI / 7);
+        const leftY = baseY - headlen * Math.sin(highlightAngle - Math.PI / 7);
+        const rightX = baseX - headlen * Math.cos(highlightAngle + Math.PI / 7);
+        const rightY = baseY - headlen * Math.sin(highlightAngle + Math.PI / 7);
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(leftX, leftY);
+        ctx.lineTo(rightX, rightY);
+        ctx.closePath();
+        ctx.fillStyle = '#1976d2';
+        ctx.shadowColor = '#1976d2';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
     }
 
     // 煙火動畫
