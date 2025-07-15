@@ -206,14 +206,14 @@
 </head>
 <body>
   <canvas id="starCanvas"></canvas>
-  <h1 id="mainTitle">🎁 即時抽獎名單 🎁</h1>
+  <h1 id="mainTitle">🎁 參加抽獎 🎁</h1>
   <div id="inputPanel">
     <div class="input-group">
       <input type="text" id="nameInput" placeholder="姓名" />
       <input type="text" id="phoneInput" placeholder="手機號碼" />
       <button onclick="submitUser()">送出</button>
     </div>
-    <div id="submitMsg"></div>
+    <div id="submitMsg" style="margin-top:0.7rem;font-size:1.15rem;font-weight:600;letter-spacing:1px;min-height:1.5em;"></div>
   </div>
 
   <div id="lotteryPanel" style="display:none;">
@@ -272,13 +272,41 @@
     window.submitUser = function() {
       const name = document.getElementById('nameInput').value.trim();
       const phone = document.getElementById('phoneInput').value.trim();
+      const msgDiv = document.getElementById('submitMsg');
       if (!name || !phone) {
-        document.getElementById('submitMsg').innerText = '請填寫完整資料';
+        msgDiv.innerText = '請填寫完整資料';
+        msgDiv.style.color = '#d32f2f';
+        msgDiv.style.background = '#fff8f8';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.padding = '0.3em 1em';
+        return;
+      }
+      if (!/^09\d{8}$/.test(phone)) {
+        msgDiv.innerText = '手機號碼必須為 09 開頭且共 10 碼數字';
+        msgDiv.style.color = '#d32f2f';
+        msgDiv.style.background = '#fff8f8';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.padding = '0.3em 1em';
+        return;
+      }
+      // 檢查重複
+      const userList = Object.values(users || {});
+      const duplicate = userList.some(u => u.name === name || u.phone === phone);
+      if (duplicate) {
+        msgDiv.innerText = '已有相同姓名或手機號碼，請勿重複送出！';
+        msgDiv.style.color = '#d32f2f';
+        msgDiv.style.background = '#fff8f8';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.padding = '0.3em 1em';
         return;
       }
       const userRef = push(ref(db, 'lottery/users'));
       set(userRef, { name, phone });
-      document.getElementById('submitMsg').innerText = '已送出！';
+      msgDiv.innerText = '已送出！';
+      msgDiv.style.color = '#388e3c';
+      msgDiv.style.background = '#e8f5e9';
+      msgDiv.style.borderRadius = '8px';
+      msgDiv.style.padding = '0.3em 1em';
       document.getElementById('nameInput').value = '';
       document.getElementById('phoneInput').value = '';
     };
@@ -755,6 +783,7 @@
     document.getElementById('mainTitle').onclick = function() {
       titleClickCount++;
       if (titleClickCount >= 3) {
+       document.getElementById('mainTitle').innerText = "🎁 即時抽獎名單 🎁"
         document.getElementById('inputPanel').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
         document.getElementById('lotteryPanel').style.display = 'none';
