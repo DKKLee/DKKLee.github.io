@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,10 +16,14 @@
       position: relative;
       overflow-x: hidden;
     }
+
     body::before {
       content: '';
       position: fixed;
-      left: 0; top: 0; width: 100vw; height: 100vh;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
       pointer-events: none;
       z-index: 0;
       background:
@@ -27,14 +32,85 @@
         radial-gradient(circle at 50% 80%, #81d4fa 0px, transparent 180px),
         radial-gradient(circle at 90% 70%, #e1bee7 0px, transparent 120px),
         radial-gradient(circle at 30% 60%, #fffde7 0px, transparent 100px),
-        linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.0) 100%);
+        linear-gradient(120deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.0) 100%);
       opacity: 0.55;
       animation: bgGlow 6s ease-in-out infinite alternate;
     }
+
     @keyframes bgGlow {
-      0% { opacity: 0.55; }
-      100% { opacity: 0.75; }
+      0% {
+        opacity: 0.55;
+      }
+
+      100% {
+        opacity: 0.75;
+      }
     }
+
+    .options-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .options-container label {
+      display: flex;
+      align-items: center;
+      padding: 5px 5px;
+      border: 2px solid #ced4da;
+      border-radius: 12px;
+      background-color: #ffffff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      font-size: 1.1em;
+      color: #555;
+      min-width: 50px;
+      text-align: left;
+    }
+
+    .options-container label:hover {
+      border-color: #8bbceb;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-3px);
+    }
+
+    .options-container input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .options-container label::before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #999;
+      margin-right: 5px;
+      background-color: #fff;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .options-container input[type="radio"]:checked+label {
+      background-color: #e0f2ff;
+      border-color: #007bff;
+      color: #0056b3;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .options-container input[type="radio"]:checked+label::before {
+      background-color: #007bff;
+      border-color: #007bff;
+      box-shadow: inset 0 0 0 6px #ffffff;
+    }
+
     .star {
       position: fixed;
       pointer-events: none;
@@ -44,62 +120,164 @@
       opacity: 0.7;
       animation: starTwinkle 2.5s infinite alternate, starFloat 12s linear infinite;
     }
+
     @keyframes starTwinkle {
-      0% { opacity: 0.7; transform: scale(1) rotate(0deg); }
-      100% { opacity: 1; transform: scale(1.3) rotate(20deg); }
+      0% {
+        opacity: 0.7;
+        transform: scale(1) rotate(0deg);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1.3) rotate(20deg);
+      }
     }
+
     @keyframes starFloat {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-40px); }
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-40px);
+      }
     }
+
     .title-animate {
       animation: titleGlow 2.2s infinite alternate;
     }
+
     @keyframes titleGlow {
-      0% { text-shadow:0 2px 12px #fff8,0 0 24px #b2ebf2; color:#4caf50; }
-      100% { text-shadow:0 4px 24px #fff,0 0 36px #81d4fa; color:#388e3c; }
+      0% {
+        text-shadow: 0 2px 12px #fff8, 0 0 24px #b2ebf2;
+        color: #4caf50;
+      }
+
+      100% {
+        text-shadow: 0 4px 24px #fff, 0 0 36px #81d4fa;
+        color: #388e3c;
+      }
     }
+
     .result-animate {
-      animation: resultPop 0.7s cubic-bezier(.4,2,.3,1);
+      animation: resultPop 0.7s cubic-bezier(.4, 2, .3, 1);
     }
+
     @keyframes resultPop {
-      0% { opacity:0; transform:scale(0.7) translateY(-40px); }
-      60% { opacity:1; transform:scale(1.08) translateY(0); }
-      100% { opacity:1; transform:scale(1) translateY(0); }
+      0% {
+        opacity: 0;
+        transform: scale(0.7) translateY(-40px);
+      }
+
+      60% {
+        opacity: 1;
+        transform: scale(1.08) translateY(0);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
-    #cameraWrap, #resultBtns, #canvas {
+
+    #cameraWrap,
+    #resultBtns,
+    #canvas {
       position: relative;
       z-index: 1;
     }
-    #cameraWrap { position: relative; display: inline-block; }
-    #video { width: 90vw; max-width: 480px; height: auto; border-radius: 12px; }
-    #overlayImg { position: absolute; right: 6px; bottom: 6px; left: auto; top: auto; width: auto; height: 240px; pointer-events: none; }
-    #canvas { display: none; margin-top: 1rem; border-radius: 12px; max-width:480px; max-height:480px; }
-    #btns { margin-top: 1.5rem; }
-    button { padding: 0.7rem 1.5rem; font-size: 1.1rem; border-radius: 8px; border: none; background: #4caf50; color: #fff; margin: 0.5rem; cursor: pointer; }
-    button:hover { background: #388e3c; }
+
+    #cameraWrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    #video {
+      width: 90vw;
+      max-width: 480px;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    #overlayImg {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      left: auto;
+      top: auto;
+      width: auto;
+      height: 240px;
+      pointer-events: none;
+    }
+
+    #canvas {
+      display: none;
+      margin-top: 1rem;
+      border-radius: 12px;
+      max-width: 480px;
+      max-height: 480px;
+    }
+
+    #btns {
+      margin-top: 1.5rem;
+    }
+
+    button {
+      padding: 0.7rem 1.5rem;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background: #4caf50;
+      color: #fff;
+      margin: 0.5rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #388e3c;
+    }
   </style>
 </head>
+
 <body>
   <script>
-  // 動態生成星光粒子
-  for (let i = 0; i < 18; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    const size = Math.random() * 8 + 6;
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
-    star.style.left = (Math.random() * 100) + 'vw';
-    star.style.top = (Math.random() * 100) + 'vh';
-    star.style.animationDelay = (Math.random() * 2) + 's';
-    document.body.appendChild(star);
-  }
+    // 動態生成星光粒子
+    for (let i = 0; i < 18; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 8 + 6;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.left = (Math.random() * 100) + 'vw';
+      star.style.top = (Math.random() * 100) + 'vh';
+      star.style.animationDelay = (Math.random() * 2) + 's';
+      document.body.appendChild(star);
+    }
   </script>
-  <h2 class="title-animate" style="letter-spacing:2px;font-weight:600;color:#4caf50;text-shadow:0 2px 12px #fff8,0 0 24px #b2ebf2;">手機拍照合成</h2>
+  <h2 class="title-animate"
+    style="letter-spacing:2px;font-weight:600;color:#4caf50;text-shadow:0 2px 12px #fff8,0 0 24px #b2ebf2;">手機拍照合成</h2>
+  <div class="options-container">
+    <input type="radio" id="option1" name="choice" value="overlay1">
+    <label for="option1">
+      圖片一
+    </label>
+
+    <input type="radio" id="option2" name="choice" value="overlay2">
+    <label for="option2">
+      圖片二
+    </label>
+
+    <input type="radio" id="option3" name="choice" value="overlay3">
+    <label for="option3">
+      圖片三
+    </label>
+  </div>
   <div id="cameraWrap" style="position:relative;">
     <video id="video" autoplay playsinline style="cursor:pointer;"></video>
-    <img id="overlayImg" src="overlay.png" alt="overlay" style="cursor:pointer;" />
-    <div id="cameraTip" style="position:absolute;left:0;right:0;bottom:12px;color:#388e3c;font-size:1.2rem;background:rgba(255,255,255,0.7);padding:0.5rem 0;border-radius:8px;">點擊畫面可拍照</div>
+    <img id="overlayImg" src="overlay1.png" alt="overlay" style="cursor:pointer;" />
+    <div id="cameraTip"
+      style="position:absolute;left:0;right:0;bottom:12px;color:#388e3c;font-size:1.2rem;background:rgba(255,255,255,0.7);padding:0.5rem 0;border-radius:8px;">
+      點擊畫面可拍照</div>
   </div>
   <canvas id="canvas" width="400" height="400"></canvas>
   <div id="resultBtns" style="display:none;"></div>
@@ -114,72 +292,90 @@
     const backBtn = document.getElementById('backBtn');
     const cameraTip = document.getElementById('cameraTip');
 
+    // 獲取所有名稱為 'choice' 的 radio 按鈕
+    const radioButtons = document.querySelectorAll('input[name="choice"]');
+
+    // 遍歷每個 radio 按鈕，並為其添加事件監聽器
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', function () {
+        // 當 radio 狀態改變（被選中）時觸發此函數
+        if (this.checked) {
+          // 獲取被選中選項的文字內容
+          // 這裡我們找到對應的 label，然後獲取其 textContent
+          const selectedLabel = document.querySelector(`label[for="${this.id}"]`);
+          const optionText = selectedLabel ? selectedLabel.textContent.trim() : this.value;
+          overlayImg.src = `${this.value}.png`; // 假設圖片名稱與 value 相同
+          // 彈出提示框
+          alert(`您選擇了: ${optionText}`);
+        }
+      });
+    });
     // 點擊即時影像或懸浮圖片也能拍照
-function doTakePhoto() {
-  // 以 video 寬高為主，canvas 跟 video 同比例
-  cameraTip.style.display = 'none';
-  const vw = video.videoWidth || 480;
-  const vh = video.videoHeight || 360;
-  canvas.width = vw;
-  canvas.height = vh;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, vw, vh);
-  // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
-  const videoRect = video.getBoundingClientRect();
-  const overlayRect = overlayImg.getBoundingClientRect();
-  // 計算 overlay 在 canvas 上的座標與尺寸
-  const scaleX = vw / videoRect.width;
-  const scaleY = vh / videoRect.height;
-  const ow = overlayRect.width * scaleX;
-  const oh = overlayRect.height * scaleY;
-  const ox = (overlayRect.left - videoRect.left) * scaleX;
-  const oy = (overlayRect.top - videoRect.top) * scaleY;
-  const imgObj = new Image();
-  imgObj.src = overlayImg.src;
-  imgObj.onload = function() {
-    ctx.drawImage(imgObj, ox, oy, ow, oh);
-    // 產生 base64 圖片
-    const url = canvas.toDataURL('image/png');
-    let resultImg = document.getElementById('resultImg');
-    if (!resultImg) {
-      resultImg = document.createElement('img');
-      resultImg.id = 'resultImg';
-      resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;';
-      resultImg.alt = '合成圖片';
-      // 顯示在 resultBtns 區塊下方
-      if (resultBtns.nextSibling) {
-        resultBtns.parentNode.insertBefore(resultImg, resultBtns.nextSibling);
-      } else {
-        resultBtns.parentNode.appendChild(resultImg);
-      }
+    function doTakePhoto() {
+      // 以 video 寬高為主，canvas 跟 video 同比例
+      cameraTip.style.display = 'none';
+      const vw = video.videoWidth || 480;
+      const vh = video.videoHeight || 360;
+      canvas.width = vw;
+      canvas.height = vh;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, vw, vh);
+      // 取得 overlayImg 在 video 上的實際顯示尺寸與位置
+      const videoRect = video.getBoundingClientRect();
+      const overlayRect = overlayImg.getBoundingClientRect();
+      // 計算 overlay 在 canvas 上的座標與尺寸
+      const scaleX = vw / videoRect.width;
+      const scaleY = vh / videoRect.height;
+      const ow = overlayRect.width * scaleX;
+      const oh = overlayRect.height * scaleY;
+      const ox = (overlayRect.left - videoRect.left) * scaleX;
+      const oy = (overlayRect.top - videoRect.top) * scaleY;
+      const imgObj = new Image();
+      imgObj.src = overlayImg.src;
+      imgObj.onload = function () {
+        ctx.drawImage(imgObj, ox, oy, ow, oh);
+        // 產生 base64 圖片
+        const url = canvas.toDataURL('image/png');
+        let resultImg = document.getElementById('resultImg');
+        if (!resultImg) {
+          resultImg = document.createElement('img');
+          resultImg.id = 'resultImg';
+          resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;';
+          resultImg.alt = '合成圖片';
+          // 顯示在 resultBtns 區塊下方
+          if (resultBtns.nextSibling) {
+            resultBtns.parentNode.insertBefore(resultImg, resultBtns.nextSibling);
+          } else {
+            resultBtns.parentNode.appendChild(resultImg);
+          }
+        }
+        // 每次拍照都覆蓋圖片
+        resultImg.src = url;
+        resultImg.style.display = 'block';
+        resultImg.classList.remove('result-animate');
+        void resultImg.offsetWidth;
+        resultImg.classList.add('result-animate');
+        setTimeout(() => {
+          // 平滑滾動到 resultImg
+          resultImg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 400);
+        canvas.style.display = 'none';
+        resultBtns.style.display = 'block';
+        // 顯示提示
+        let tip = document.getElementById('saveTip');
+        if (!tip) {
+          tip = document.createElement('div');
+          tip.id = 'saveTip';
+          tip.innerText = '長按圖片可儲存到相簿';
+          tip.style = 'color:#388e3c;font-size:1.1rem;margin:0.5rem 0;';
+          resultImg.parentNode.insertBefore(tip, resultImg.nextSibling);
+        } else {
+          tip.style.display = 'block';
+        }
+      };
     }
-    // 每次拍照都覆蓋圖片
-    resultImg.src = url;
-    resultImg.style.display = 'block';
-    resultImg.classList.remove('result-animate');
-    void resultImg.offsetWidth;
-    resultImg.classList.add('result-animate');
-    setTimeout(() => {
-      // 平滑滾動到 resultImg
-      resultImg.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 400);
-    canvas.style.display = 'none';
-    resultBtns.style.display = 'block';
-    // 顯示提示
-    let tip = document.getElementById('saveTip');
-    if (!tip) {
-      tip = document.createElement('div');
-      tip.id = 'saveTip';
-      tip.innerText = '長按圖片可儲存到相簿';
-      tip.style = 'color:#388e3c;font-size:1.1rem;margin:0.5rem 0;';
-      resultImg.parentNode.insertBefore(tip, resultImg.nextSibling);
-    } else {
-      tip.style.display = 'block';
-    }
-  };
-}
-video.onclick = doTakePhoto;
-overlayImg.onclick = doTakePhoto;
+    video.onclick = doTakePhoto;
+    overlayImg.onclick = doTakePhoto;
 
     // 啟動相機
     async function startCamera() {
@@ -193,12 +389,12 @@ overlayImg.onclick = doTakePhoto;
     startCamera();
 
     // 拍照合成
-    takePhotoBtn.onclick = function() {
+    takePhotoBtn.onclick = function () {
       doTakePhoto();
     };
 
     // 下載圖片
-    downloadBtn.onclick = function() {
+    downloadBtn.onclick = function () {
       // 下載 resultImg 的圖片
       const resultImg = document.getElementById('resultImg');
       if (resultImg && resultImg.src) {
@@ -212,9 +408,10 @@ overlayImg.onclick = doTakePhoto;
       }
     };
     // 回主畫面
-    backBtn.onclick = function() {
+    backBtn.onclick = function () {
       // 已移除主畫面功能，這裡不做任何事
     };
   </script>
 </body>
+
 </html>
