@@ -343,11 +343,12 @@
           resultImg.style = 'width:90vw;max-width:480px;border-radius:12px;margin-top:1.5rem;display:block;object-fit:contain;';
           resultImg.alt = '合成圖片';
           // 顯示在 resultBtns 區塊下方
-          if (resultBtns.nextSibling) {
-            resultBtns.parentNode.insertBefore(resultImg, resultBtns.nextSibling);
-          } else {
-            resultBtns.parentNode.appendChild(resultImg);
-          }
+          resultBtns.parentNode.appendChild(resultImg);
+          // if (resultBtns.nextSibling) {
+          //   resultBtns.parentNode.insertBefore(resultImg, resultBtns.nextSibling);
+          // } else {
+          //   resultBtns.parentNode.appendChild(resultImg);
+          // }
         }
         // 每次拍照都覆蓋圖片
         resultImg.src = url;
