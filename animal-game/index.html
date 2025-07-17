@@ -7,11 +7,260 @@
   <title>動物點擊競賽</title>
   <style>
     body {
+    /* 太陽動畫 */
+    .sun {
+      position: absolute;
+      top: 3vh;
+      right: 6vw;
+      width: 80px;
+      height: 80px;
+      z-index: 10;
+      border-radius: 50%;
+      background: radial-gradient(circle at 60% 40%, #fffde4 30%, #ffe082 70%, #ffd600 100%);
+      box-shadow: 0 0 40px 10px #ffe08299, 0 0 0 #fff0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: sun-rotate 8s linear infinite;
+      overflow: visible;
+    }
+    @keyframes sun-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .sun-face {
+      position: absolute;
+      left: 0; top: 0;
+      width: 80px; height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 11;
+    }
+    .sun-smile {
+      /* position: absolute;
+      left: 22px; top: 38px;
+      width: 36px; height: 18px;
+      border-bottom: 4px solid #fbc02d;
+      border-radius: 0 0 36px 36px; */
+
+       position: absolute;
+       left: 22px; top: 43px;
+        width: 39px;
+        height: 13px;
+        border-bottom: 4px solid #fbc02d;
+        border-radius: 0 0 30px 30px;
+        transform: rotate(-10deg);
+    }
+    .sun-eye {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: #fbc02d;
+      border-radius: 50%;
+      top: 28px;
+    }
+    .sun-eye.left { left: 28px; }
+    .sun-eye.right { left: 44px; }
+
+    .sunglasses {
+        position: absolute;
+        top: 55px;
+        left: 35px;
+        width: 110px;
+        height: 30px;
+        background: black;
+        border-radius: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 5px;
+        animation: liftFromLeft 4s infinite ease-in-out;
+      }
+      .lens {
+        width: 45px;
+        height: 25px;
+        background: #333;
+        border-radius: 8px;
+      }
+    .sun-ray {
+      position: absolute;
+      width: 16px; height: 4px;
+      background: linear-gradient(90deg, #ffd600 60%, #fffde4 100%);
+      border-radius: 2px;
+      top: 38px; left: 32px;
+      transform-origin: 8px 42px;
+      opacity: 0.7;
+    }
+
+   
+    /* 12道光芒 */
+    .sun-ray.r0 { transform: rotate(0deg) translateY(-44px); }
+    .sun-ray.r1 { transform: rotate(30deg) translateY(-44px); }
+    .sun-ray.r2 { transform: rotate(60deg) translateY(-44px); }
+    .sun-ray.r3 { transform: rotate(90deg) translateY(-44px); }
+    .sun-ray.r4 { transform: rotate(120deg) translateY(-44px); }
+    .sun-ray.r5 { transform: rotate(150deg) translateY(-44px); }
+    .sun-ray.r6 { transform: rotate(180deg) translateY(-44px); }
+    .sun-ray.r7 { transform: rotate(210deg) translateY(-44px); }
+    .sun-ray.r8 { transform: rotate(240deg) translateY(-44px); }
+    .sun-ray.r9 { transform: rotate(270deg) translateY(-44px); }
+    .sun-ray.r10 { transform: rotate(300deg) translateY(-44px); }
+    .sun-ray.r11 { transform: rotate(330deg) translateY(-44px); }
       font-family: "Segoe UI", sans-serif;
       text-align: center;
-      background: #f0f8ff;
+      background: linear-gradient(120deg, #fceabb 0%, #f8b500 40%, #fceabb 100%);
       margin: 0;
       padding: 2rem;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    /* 樂園雲朵 */
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.85;
+      box-shadow:
+        60px 0px 0px 0px #fff,
+        120px 10px 0px 0px #fff,
+        30px 20px 0px 0px #fff,
+        90px 25px 0px 0px #fff;
+      width: 100px;
+      height: 60px;
+      z-index: 0;
+      animation: cloudMove 40s linear infinite;
+    }
+    .cloud2 {
+      width: 70px;
+      height: 40px;
+      left: 60vw;
+      top: 12vh;
+      opacity: 0.7;
+      animation-duration: 55s;
+    }
+    .cloud3 {
+      width: 120px;
+      height: 70px;
+      left: 20vw;
+      top: 18vh;
+      opacity: 0.6;
+      animation-duration: 70s;
+    }
+    @keyframes cloudMove {
+      0% { left: -150px; }
+      100% { left: 110vw; }
+    }
+    /* 樂園彩球 */
+    .balloon {
+      position: absolute;
+      width: 38px;
+      height: 48px;
+      background: radial-gradient(circle at 60% 30%, #fff 10%, #ffb347 60%, #ffcc80 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      box-shadow: 0 6px 18px #ffb34755;
+      z-index: 1;
+      animation: balloonFloat 7s ease-in-out infinite alternate;
+    }
+    .balloon2 {
+      left: 80vw;
+      top: 30vh;
+      background: radial-gradient(circle at 60% 30%, #fff 10%, #81d4fa 60%, #b3e5fc 100%);
+      animation-delay: 2s;
+    }
+    .balloon3 {
+      left: 10vw;
+      top: 35vh;
+      background: radial-gradient(circle at 60% 30%, #fff 10%, #e57373 60%, #ffcdd2 100%);
+      animation-delay: 3.5s;
+    }
+
+     @keyframes liftFromLeft {
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(-25deg); }
+      50%  { transform: rotate(0deg); }
+      75%  { transform: rotate(-25deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    @keyframes balloonFloat {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-40px) scale(1.07); }
+    }
+    /* 樂園草地 */
+    .grass {
+      position: fixed;
+      left: 0; bottom: 0;
+      width: 100vw;
+      height: 120px;
+      background: linear-gradient(0deg, #388e3c 80%, #81c784 100%);
+      z-index: 2;
+      box-shadow: 0 -8px 32px #388e3c44;
+      overflow: visible;
+    }
+    .grass-decoration {
+      position: fixed;
+      left: 0; bottom: 0;
+      width: 100vw;
+      height: 120px;
+      pointer-events: none;
+      z-index: 3;
+    }
+    /* 草叢 */
+    .bush {
+      position: absolute;
+      bottom: 18px;
+      width: 60px;
+      height: 32px;
+      background: radial-gradient(circle at 60% 60%, #66bb6a 60%, #388e3c 100%);
+      border-radius: 50% 50% 50% 50% / 70% 70% 60% 60%;
+      box-shadow: -18px 0 0 0 #81c784, 18px 0 0 0 #81c784;
+    }
+    .bush2 {
+      left: 18vw;
+      width: 38px;
+      height: 20px;
+      background: radial-gradient(circle at 60% 60%, #a5d6a7 60%, #388e3c 100%);
+      box-shadow: -10px 0 0 0 #81c784, 10px 0 0 0 #81c784;
+    }
+    .bush3 {
+      left: 70vw;
+      width: 48px;
+      height: 26px;
+      background: radial-gradient(circle at 60% 60%, #43a047 60%, #388e3c 100%);
+      box-shadow: -14px 0 0 0 #81c784, 14px 0 0 0 #81c784;
+    }
+    /* 小花 */
+    .flower {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #fff176 60%, #f06292 100%);
+      border-radius: 50%;
+      box-shadow: 8px 0 #fff176, -8px 0 #fff176, 0 8px #fff176, 0 -8px #fff176;
+      /* 位置由 style 動態控制 */
+    }
+    .flower2 {
+      left: 80vw;
+      background: radial-gradient(circle, #fff176 60%, #4fc3f7 100%);
+    }
+    /* 小樹 */
+    .tree {
+      position: absolute;
+      width: 12px;
+      height: 36px;
+      background: #8d6e63;
+      border-radius: 4px;
+    }
+    .tree::after {
+      content: '';
+      position: absolute;
+      left: -10px; top: -22px;
+      width: 32px; height: 32px;
+      background: radial-gradient(circle at 60% 60%, #388e3c 60%, #81c784 100%);
+      border-radius: 50%;
+      z-index: 1;
     }
 
     h1 {
@@ -68,6 +317,37 @@
 </head>
 
 <body>
+  <!-- 動態太陽（右上角） -->
+  <!-- <div class="sun">
+    <div class="sun-face">
+      <div class="sunglasses">
+        <div class="lens"></div>
+        <div class="lens"></div>
+      </div>
+      <div class="sun-eye left"></div>
+      <div class="sun-eye right"></div>
+      <div class="sun-smile"></div>
+    </div>
+    <div class="sun-ray r0"></div>
+    <div class="sun-ray r1"></div>
+    <div class="sun-ray r2"></div>
+    <div class="sun-ray r3"></div>
+    <div class="sun-ray r4"></div>
+    <div class="sun-ray r5"></div>
+    <div class="sun-ray r6"></div>
+    <div class="sun-ray r7"></div>
+    <div class="sun-ray r8"></div>
+    <div class="sun-ray r9"></div>
+    <div class="sun-ray r10"></div>
+    <div class="sun-ray r11"></div>
+  </div> -->
+  <!-- 樂園雲朵與彩球 -->
+  <div class="cloud" style="top:8vh;left:5vw;"></div>
+  <div class="cloud cloud2"></div>
+  <div class="cloud cloud3"></div>
+  <div class="balloon" style="left: 15vw; top: 28vh;"></div>
+  <div class="balloon balloon2"></div>
+  <div class="balloon balloon3"></div>
   <h1 onclick="verifyArea()">🐾 動物點擊競賽 🐾</h1>
   <div id="countdown">等待開始...</div>
   <div id="selectScreen">
@@ -104,6 +384,33 @@
     </label>
   </div>
 
+  <!-- 樂園草地 -->
+  <div class="grass"></div>
+  <div class="grass-decoration">
+    <!-- 小花與小樹隨機分布，顏色/大小/旋轉隨機 -->
+    <div class="flower" style="left:7vw; bottom:14px; transform:rotate(-8deg) scale(1.1);"></div>
+    <div class="flower flower2" style="left:13vw; bottom:22px; transform:rotate(12deg) scale(0.9); background:radial-gradient(circle,#fff176 60%,#4fc3f7 100%);"></div>
+    <div class="flower" style="left:19vw; bottom:8px; transform:rotate(-18deg) scale(1.2); background:radial-gradient(circle,#fff176 60%,#aed581 100%);"></div>
+    <div class="flower" style="left:27vw; bottom:18px; transform:rotate(7deg) scale(0.8); background:radial-gradient(circle,#fff176 60%,#f06292 100%);"></div>
+    <div class="flower" style="left:36vw; bottom:12px; transform:rotate(-13deg) scale(1.15); background:radial-gradient(circle,#fff176 60%,#fbc02d 100%);"></div>
+    <div class="flower" style="left:44vw; bottom:20px; transform:rotate(5deg) scale(1.05); background:radial-gradient(circle,#fff176 60%,#4fc3f7 100%);"></div>
+    <div class="flower" style="left:53vw; bottom:10px; transform:rotate(-10deg) scale(0.95); background:radial-gradient(circle,#fff176 60%,#f06292 100%);"></div>
+    <div class="flower" style="left:61vw; bottom:16px; transform:rotate(15deg) scale(1.18); background:radial-gradient(circle,#fff176 60%,#aed581 100%);"></div>
+    <div class="flower" style="left:68vw; bottom:7px; transform:rotate(-6deg) scale(1.08); background:radial-gradient(circle,#fff176 60%,#fbc02d 100%);"></div>
+    <div class="flower" style="left:76vw; bottom:19px; transform:rotate(9deg) scale(1.12); background:radial-gradient(circle,#fff176 60%,#f06292 100%);"></div>
+    <div class="flower" style="left:83vw; bottom:11px; transform:rotate(-11deg) scale(0.92); background:radial-gradient(circle,#fff176 60%,#4fc3f7 100%);"></div>
+    <div class="flower" style="left:91vw; bottom:23px; transform:rotate(17deg) scale(1.13); background:radial-gradient(circle,#fff176 60%,#aed581 100%);"></div>
+    <!-- 小樹隨機分布 -->
+    <div class="tree" style="left:10vw; bottom:28px; transform:scale(1.1) rotate(-6deg);"></div>
+    <div class="tree" style="left:18vw; bottom:18px; transform:scale(0.9) rotate(8deg);"></div>
+    <div class="tree" style="left:25vw; bottom:24px; transform:scale(1.15) rotate(-12deg);"></div>
+    <div class="tree" style="left:38vw; bottom:20px; transform:scale(1.05) rotate(5deg);"></div>
+    <div class="tree" style="left:52vw; bottom:26px; transform:scale(0.95) rotate(-9deg);"></div>
+    <div class="tree" style="left:63vw; bottom:16px; transform:scale(1.12) rotate(11deg);"></div>
+    <div class="tree" style="left:71vw; bottom:22px; transform:scale(1.08) rotate(-7deg);"></div>
+    <div class="tree" style="left:80vw; bottom:19px; transform:scale(1.18) rotate(13deg);"></div>
+    <div class="tree" style="left:89vw; bottom:25px; transform:scale(1.03) rotate(-4deg);"></div>
+  </div>
   <script type="module">
     // ✅ 替換成你的 Firebase 設定
     const firebaseConfig = {
