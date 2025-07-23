@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Bingo Battle Pro</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 5px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: #eee;
+            border: 1px solid #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .clicked {
+            background: #4caf50;
+            color: white;
+        }
+
+        .won {
+            background: gold;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🔥 Bingo Battle Pro</h2>
+    <button onclick="login()">Login with Google</button>
+    <div id="playerInfo"></div>
+
+    <input type="text" id="roomInput" placeholder="Room Code" />
+    <select id="playerSelect">
+        <option value="playerA">Player A</option>
+        <option value="playerB">Player B</option>
+    </select>
+
+    <div class="board" id="board"></div>
+    <h3 id="scoreDisplay"></h3>
+
+    <script>
+        // ✨ Firebase 設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfVYrZ07ZWwV_uYnbUFflU8iik93grvns",
+            authDomain: "bingogame-8bb16.firebaseapp.com",
+            projectId: "bingogame-8bb16",
+            storageBucket: "bingogame-8bb16.firebasestorage.app",
+            messagingSenderId: "913984914435",
+            appId: "1:913984914435:web:b26b5c396b54f20bfaba36",
+            measurementId: "G-HLMC4VXT5V"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let uid = "";
+        let name = "";
+
+        const 題庫 = [
+            "Capital of France?", "2 + 2 = ?", "HTML stands for?", "Author of '1984'?", "Closest planet to Sun?",
+            "JavaScript keyword for function?", "Color of sky?", "Fastest land animal?", "Element: H = ?", "Which ocean is largest?",
+            "Basic unit of life?", "Mars is known as?", "Pi equals approximately?", "Most spoken language?", "Earth’s satellite?",
+            "Founder of Facebook?", "Highest mountain?", "Binary of 2?", "Currency of Japan?", "Continent with most countries?",
+            "React is a?", "CSS stands for?", "CPU full form?", "Android is based on?", "Opposite of cold?"
+        ];
+
+        const 答案庫 = [
+            "paris", "4", "hypertext markup language", "george orwell", "mercury",
+            "function", "blue", "cheetah", "hydrogen", "pacific",
+            "cell", "red planet", "3.14", "english", "moon",
+            "mark zuckerberg", "mount everest", "10", "yen", "africa",
+            "javascript library", "cascading style sheets", "central processing unit", "linux", "hot"
+        ];
+
+        const login = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(result => {
+                uid = result.user.uid;
+                name = result.user.displayName;
+                document.getElementById("playerInfo").textContent = `👤 Hello, ${name}`;
+            });
+        };
+
+        const boardEl = document.getElementById("board");
+        const roomInput = document.getElementById("roomInput");
+        const playerSelect = document.getElementById("playerSelect");
+        const scoreDisplay = document.getElementById("scoreDisplay");
+
+        const drawBoard = () => {
+            boardEl.innerHTML = "";
+            題庫.forEach((題目, i) => {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.textContent = "❓";
+                cell.id = `cell-${i}`;
+                cell.onclick = () => showQuestion(i);
+                boardEl.appendChild(cell);
+            });
+        };
+
+        const showQuestion = (i) => {
+            const answer = prompt(`📋 ${題庫[i]}`);
+            if (!answer) return;
+            const correct = 答案庫[i].toLowerCase();
+            if (answer.toLowerCase().trim() === correct) {
+                const room = roomInput.value || "defaultRoom";
+                const player = playerSelect.value;
+                db.ref(`game/${room}/${player}/${i}`).set(true);
+            } else {
+                alert("❌ Incorrect!");
+            }
+        };
+
+        const listenBoardUpdates = () => {
+            const room = roomInput.value || "defaultRoom";
+            ["playerA", "playerB"].forEach(player => {
+                db.ref(`game/${room}/${player}`).on("value", snapshot => {
+                    const data = snapshot.val();
+                    if (!data) return;
+                    Object.entries(data).forEach(([key, val]) => {
+                        const cell = document.getElementById(`cell-${key}`);
+                        if (cell && val) cell.classList.add("clicked");
+                    });
+                    checkWin(Object.keys(data).map(Number), room, player);
+                });
+            });
+
+            ["playerA", "playerB"].forEach(player => {
+                db.ref(`score/${room}/${player}`).on("value", snap => {
+                    const score = snap.val() || 0;
+                    scoreDisplay.innerHTML += `<div>${player}: ${score} pts</div>`;
+                });
+            });
+        };
+
+        const checkWin = (clicked, room, player) => {
+            const lines = [
+                [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+                [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+                [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+            ];
+            lines.forEach(line => {
+                if (line.every(x => clicked.includes(x))) {
+                    line.forEach(c => {
+                        const cell = document.getElementById(`cell-${c}`);
+                        if (cell) cell.classList.add("won");
+                    });
+                    alert(`🎉 ${player} wins!`);
+                    db.ref(`score/${room}/${player}`).transaction(s => (s || 0) + 10);
+                }
+            });
+        };
+
+        drawBoard();
+        roomInput.onchange = listenBoardUpdates;
+        playerSelect.onchange = listenBoardUpdates;
+    </script>
+
+</body>
+
+</html>
