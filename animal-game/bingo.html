@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 
 <head>
     <meta charset="UTF-8" />
-    <title>Bingo Battle Pro</title>
+    <title>Bingo Battle Pro v2</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -31,28 +31,23 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-        }
-
-        .clicked {
-            background: #4caf50;
-            color: white;
+            font-weight: bold;
         }
 
         .won {
             background: gold;
             color: black;
-            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
 
-    <h2>🔥 Bingo Battle Pro</h2>
-    <button onclick="login()">Login with Google</button>
+    <h2>🔥 Bingo Battle Pro v2</h2>
+    <button onclick="login()">匿名登入</button>
     <div id="playerInfo"></div>
 
-    <input type="text" id="roomInput" placeholder="Room Code" />
+    <input type="text" id="roomInput" placeholder="房間代碼（可輸入任意代碼）" />
     <select id="playerSelect">
         <option value="playerA">Player A</option>
         <option value="playerB">Player B</option>
@@ -62,7 +57,7 @@
     <h3 id="scoreDisplay"></h3>
 
     <script>
-        // ✨ Firebase 設定
+        // 🔧 Firebase 設定（請替換成你的專案設定）
         const firebaseConfig = {
             apiKey: "AIzaSyDfVYrZ07ZWwV_uYnbUFflU8iik93grvns",
             authDomain: "bingogame-8bb16.firebaseapp.com",
@@ -80,42 +75,37 @@
         let name = "";
 
         const 題庫 = [
-            "Capital of France?", "2 + 2 = ?", "HTML stands for?", "Author of '1984'?", "Closest planet to Sun?",
-            "JavaScript keyword for function?", "Color of sky?", "Fastest land animal?", "Element: H = ?", "Which ocean is largest?",
-            "Basic unit of life?", "Mars is known as?", "Pi equals approximately?", "Most spoken language?", "Earth’s satellite?",
-            "Founder of Facebook?", "Highest mountain?", "Binary of 2?", "Currency of Japan?", "Continent with most countries?",
-            "React is a?", "CSS stands for?", "CPU full form?", "Android is based on?", "Opposite of cold?"
+            "台灣的首都是？", "太陽從哪裡升起？", "3 × 4 = ?", "國慶日？", "紅色水果？",
+            "水的沸點？", "台灣最高山？", "你 的英文？", "春天是哪些月？", "台灣用什麼貨幣？",
+            "地球的衛星？", "Facebook創辦人？", "最高山？", "2 的二進位？", "日文貨幣？",
+            "CSS 是什麼縮寫？", "CPU 全名？", "React 是什麼？", "Pi 約等於？", "最多國家洲？",
+            "大象是陸上最大？", "火星別名？", "地球第3行星？", "HTML 是什麼？", "水的化學式？"
         ];
-
         const 答案庫 = [
-            "paris", "4", "hypertext markup language", "george orwell", "mercury",
-            "function", "blue", "cheetah", "hydrogen", "pacific",
-            "cell", "red planet", "3.14", "english", "moon",
-            "mark zuckerberg", "mount everest", "10", "yen", "africa",
-            "javascript library", "cascading style sheets", "central processing unit", "linux", "hot"
+            "台北", "東方", "12", "10月10日", "蘋果",
+            "100", "玉山", "you", "3到5月", "新台幣",
+            "月亮", "Mark Zuckerberg", "玉山", "10", "日圓",
+            "Cascading Style Sheets", "Central Processing Unit", "JavaScript Library", "3.14", "非洲",
+            "是", "紅色星球", "地球", "HyperText Markup Language", "H2O"
         ];
-
-        const login = () => {
-            auth.signInAnonymously()
-                .then(result => {
-                    uid = result.user.uid;
-                    name = "Guest"; // 或給予匿名代號
-                    document.getElementById("playerInfo").textContent = `👤 Hello, ${name}`;
-                })
-                .catch(error => {
-                    console.error("匿名登入錯誤：", error);
-                });
-        };
-
 
         const boardEl = document.getElementById("board");
         const roomInput = document.getElementById("roomInput");
         const playerSelect = document.getElementById("playerSelect");
         const scoreDisplay = document.getElementById("scoreDisplay");
 
+        const login = () => {
+            auth.signInAnonymously()
+                .then(result => {
+                    uid = result.user.uid;
+                    name = "Guest";
+                    document.getElementById("playerInfo").textContent = `👤 已登入：${name}`;
+                });
+        };
+
         const drawBoard = () => {
             boardEl.innerHTML = "";
-            題庫.forEach((題目, i) => {
+            題庫.forEach((_, i) => {
                 const cell = document.createElement("div");
                 cell.className = "cell";
                 cell.textContent = "❓";
@@ -126,36 +116,53 @@
         };
 
         const showQuestion = (i) => {
-            const answer = prompt(`📋 ${題庫[i]}`);
+            const answer = prompt(`📋 題目：${題庫[i]}`);
             if (!answer) return;
-            const correct = 答案庫[i].toLowerCase();
+            const correct = 答案庫[i].toLowerCase().trim();
+            const room = roomInput.value || "defaultRoom";
+            const player = playerSelect.value;
+            const answerRef = db.ref(`game/${room}/answers/${i}`);
+
             if (answer.toLowerCase().trim() === correct) {
-                const room = roomInput.value || "defaultRoom";
-                const player = playerSelect.value;
-                db.ref(`game/${room}/${player}/${i}`).set(true);
+                answerRef.transaction(current => {
+                    if (!current) return { answeredBy: player };
+                    return; // 已有人答過
+                });
             } else {
-                alert("❌ Incorrect!");
+                alert("❌ 錯誤答案！");
             }
         };
 
-        const listenBoardUpdates = () => {
+        const listenUpdates = () => {
             const room = roomInput.value || "defaultRoom";
-            ["playerA", "playerB"].forEach(player => {
-                db.ref(`game/${room}/${player}`).on("value", snapshot => {
-                    const data = snapshot.val();
-                    if (!data) return;
-                    Object.entries(data).forEach(([key, val]) => {
-                        const cell = document.getElementById(`cell-${key}`);
-                        if (cell && val) cell.classList.add("clicked");
-                    });
-                    checkWin(Object.keys(data).map(Number), room, player);
+            scoreDisplay.innerHTML = "";
+
+            db.ref(`game/${room}/answers`).on("value", snapshot => {
+                const data = snapshot.val() || {};
+                Object.entries(data).forEach(([i, obj]) => {
+                    const cell = document.getElementById(`cell-${i}`);
+                    if (!cell) return;
+                    if (obj.answeredBy === "playerA") {
+                        cell.style.background = "#4caf50";
+                        cell.textContent = "A";
+                    } else if (obj.answeredBy === "playerB") {
+                        cell.style.background = "#2196f3";
+                        cell.textContent = "B";
+                    }
+                });
+
+                ["playerA", "playerB"].forEach(player => {
+                    const cells = Object.entries(data).filter(([_, obj]) => obj.answeredBy === player).map(([i]) => parseInt(i));
+                    checkWin(cells, room, player);
                 });
             });
 
             ["playerA", "playerB"].forEach(player => {
                 db.ref(`score/${room}/${player}`).on("value", snap => {
                     const score = snap.val() || 0;
-                    scoreDisplay.innerHTML += `<div>${player}: ${score} pts</div>`;
+                    const label = document.createElement("div");
+                    label.textContent = `${player}: ${score} 分`;
+                    scoreDisplay.appendChild(label);
                 });
             });
         };
@@ -172,15 +179,15 @@
                         const cell = document.getElementById(`cell-${c}`);
                         if (cell) cell.classList.add("won");
                     });
-                    alert(`🎉 ${player} wins!`);
+                    alert(`🎉 ${player} 贏了！`);
                     db.ref(`score/${room}/${player}`).transaction(s => (s || 0) + 10);
                 }
             });
         };
 
         drawBoard();
-        roomInput.onchange = listenBoardUpdates;
-        playerSelect.onchange = listenBoardUpdates;
+        roomInput.onchange = listenUpdates;
+        playerSelect.onchange = listenUpdates;
     </script>
 
 </body>
