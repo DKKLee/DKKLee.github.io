@@ -144,6 +144,7 @@
             if (answer.toLowerCase().trim() === correct) {
                 answerRef.transaction(current => {
                     if (!current) return { answeredBy: player };
+                     alert(`❗ 此題已被 ${player} 答對`);
                     return; // 已有人答過
                 });
             } else {
