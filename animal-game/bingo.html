@@ -134,22 +134,24 @@
 
 
         const showQuestion = (i) => {
-            const answer = prompt(`📋 題目：${題庫[i]}`);
-            if (!answer) return;
-            const correct = 答案庫[i].toLowerCase().trim();
             const room = roomInput.value || "defaultRoom";
             const player = playerSelect.value;
-            const answerRef = db.ref(`game/${room}/answers/${i}`);
 
-            if (answer.toLowerCase().trim() === correct) {
-                answerRef.transaction(current => {
-                    if (!current) return { answeredBy: player };
-                     alert(`❗ 此題已被 ${player} 答對`);
-                    return; // 已有人答過
-                });
-            } else {
-                alert("❌ 錯誤答案！");
-            }
+            db.ref(`game/${room}/answers/${i}`).once("value", snapshot => {
+                const data = snapshot.val();
+                if (data?.answeredBy) {
+                    alert(`❗ 此題已被 ${data.answeredBy} 答對`);
+                    return;
+                }
+
+                const userAnswer = prompt(`📋 題目：${題庫[i]}`);
+                if (userAnswer?.toLowerCase().trim() === 答案庫[i].toLowerCase()) {
+                    db.ref(`game/${room}/answers/${i}`).set({ answeredBy: player });
+                } else {
+                    alert("❌ 錯誤答案！");
+                }
+            });
+
         };
 
         const listenUpdates = () => {
