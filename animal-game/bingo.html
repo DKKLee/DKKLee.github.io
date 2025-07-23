@@ -74,14 +74,14 @@
         let uid = "";
         let name = "";
 
-        const 題庫 = [
+        let 題庫 = [
             "台灣的首都是？", "太陽從哪裡升起？", "3 × 4 = ?", "國慶日？", "紅色水果？",
             "水的沸點？", "台灣最高山？", "你 的英文？", "春天是哪些月？", "台灣用什麼貨幣？",
             "地球的衛星？", "Facebook創辦人？", "最高山？", "2 的二進位？", "日文貨幣？",
             "CSS 是什麼縮寫？", "CPU 全名？", "React 是什麼？", "Pi 約等於？", "最多國家洲？",
             "大象是陸上最大？", "火星別名？", "地球第3行星？", "HTML 是什麼？", "水的化學式？"
         ];
-        const 答案庫 = [
+        let 答案庫 = [
             "台北", "東方", "12", "10月10日", "蘋果",
             "100", "玉山", "you", "3到5月", "新台幣",
             "月亮", "Mark Zuckerberg", "玉山", "10", "日圓",
@@ -104,7 +104,7 @@
         };
 
         function shuffle題庫與答案(題庫, 答案庫) {
-            const combined = 題庫.map((q, i) => ({ question: q, answer: 答案庫[i] }));
+            let combined = 題庫.map((q, i) => ({ question: q, answer: 答案庫[i] }));
             for (let i = combined.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [combined[i], combined[j]] = [combined[j], combined[i]];
@@ -115,7 +115,7 @@
             return { shuffled題庫, shuffled答案庫 };
         }
 
-        const { shuffled題庫, shuffled答案庫 } = shuffle題庫與答案(題庫, 答案庫);
+        let { shuffled題庫, shuffled答案庫 } = shuffle題庫與答案(題庫, 答案庫);
         題庫 = shuffled題庫;
         答案庫 = shuffled答案庫;
 
