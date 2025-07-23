@@ -103,6 +103,18 @@
                 });
         };
 
+        function shuffle題庫與答案(題庫, 答案庫) {
+            const combined = 題庫.map((q, i) => ({ question: q, answer: 答案庫[i] }));
+            for (let i = combined.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [combined[i], combined[j]] = [combined[j], combined[i]];
+            }
+            // 拆回來
+            const shuffled題庫 = combined.map(item => item.question);
+            const shuffled答案庫 = combined.map(item => item.answer);
+            return { shuffled題庫, shuffled答案庫 };
+        }
+
         const { shuffled題庫, shuffled答案庫 } = shuffle題庫與答案(題庫, 答案庫);
         題庫 = shuffled題庫;
         答案庫 = shuffled答案庫;
@@ -119,17 +131,6 @@
             });
         };
 
-        function shuffle題庫與答案(題庫, 答案庫) {
-            const combined = 題庫.map((q, i) => ({ question: q, answer: 答案庫[i] }));
-            for (let i = combined.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [combined[i], combined[j]] = [combined[j], combined[i]];
-            }
-            // 拆回來
-            const shuffled題庫 = combined.map(item => item.question);
-            const shuffled答案庫 = combined.map(item => item.answer);
-            return { shuffled題庫, shuffled答案庫 };
-        }
 
 
         const showQuestion = (i) => {
