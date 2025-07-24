@@ -162,9 +162,11 @@
     <h2 id="clickTitle">🔥 Bingo Battle</h2>
 
     <div id="clientPanel">
-        <input type="text" id="inputName" placeholder="輸入暱稱" />
-        <input type="text" id="inputPhone" placeholder="輸入電話" />
-        <button onclick="login()">登入</button>
+        <div id="inputPanel">
+            <input type="text" id="inputName" placeholder="輸入暱稱" />
+            <input type="text" id="inputPhone" placeholder="輸入電話" />
+            <button onclick="login()">登入</button>
+        </div>
         <div id="playerInfo"></div>
 
         <div class="board" id="board"></div>
@@ -233,6 +235,7 @@
                         playerId = key;
                         playerName = users[key].name;
                         document.getElementById("playerInfo").textContent = `👤 歡迎 ${playerName}`;
+                        inputPanel.style.display = "none";
                         initGame();
                     } else {
                         alert("❌ 登入失敗，請檢查輸入是否正確");
