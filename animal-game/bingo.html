@@ -4,60 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <title id="mainTitle">Bingo Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <style>
-        /* 🚨 科技感背景 */
         body {
             margin: 0;
-            padding: 20px;
-            font-family: 'Consolas', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #080808, #151515);
-            color: #00f6ff;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1a1a2f);
+            color: #00f0ff;
             text-align: center;
-            position: relative;
-            overflow-x: hidden;
+            padding: 20px;
         }
 
         h2 {
             font-size: 28px;
-            letter-spacing: 2px;
-            color: #00e1ff;
-            text-shadow: 0 0 10px #00e1ff;
-            cursor: pointer;
-            user-select: none;
+            color: #00eaff;
             margin-bottom: 20px;
+            text-shadow: 0 0 10px #00eaff;
+            letter-spacing: 2px;
+            cursor: pointer;
         }
 
         input,
         button {
-            margin: 10px auto;
+            margin: 8px auto;
             padding: 10px;
             border-radius: 6px;
             border: none;
             width: 90%;
-            max-width: 300px;
+            max-width: 320px;
             font-size: 16px;
+            font-family: inherit;
             box-sizing: border-box;
             display: block;
-            font-family: inherit;
         }
 
         input {
-            background: #1f1f1f;
+            background: #111;
             color: #00f6ff;
             border: 1px solid #00f6ff;
-            box-shadow: 0 0 5px #00f6ff50;
+            box-shadow: 0 0 6px #00f6ff50;
         }
 
         button {
             background: #00f6ff;
             color: black;
             font-weight: bold;
-            cursor: pointer;
             box-shadow: 0 0 10px #00f6ff;
             transition: transform 0.2s;
+            cursor: pointer;
         }
 
         button:hover {
@@ -71,7 +68,6 @@
             text-shadow: 0 0 6px #00ffe740;
         }
 
-        /* 🟪 賓果格子樣式 - 晶片感 */
         .board {
             display: grid;
             grid-template-columns: repeat(5, 60px);
@@ -88,16 +84,16 @@
             font-weight: bold;
             border-radius: 6px;
             border: 1px solid #00f6ff50;
+            box-shadow: inset 0 0 6px #00f6ff20;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 0 10px #00f6ff20 inset;
             transition: 0.3s;
         }
 
         .cell:hover {
-            box-shadow: 0 0 12px #00f6ff, inset 0 0 6px #00f6ff;
+            box-shadow: 0 0 10px #00f6ff, inset 0 0 4px #00f6ff;
             transform: scale(1.05);
         }
 
@@ -107,45 +103,43 @@
             box-shadow: 0 0 12px #00ff99, inset 0 0 6px #00ff99;
         }
 
-        /* 📱 行動裝置支援 */
+        /* 📱 手機優化 */
         @media screen and (max-width: 600px) {
             .board {
-                grid-template-columns: repeat(5, 42px);
-                gap: 7px;
+                grid-template-columns: repeat(5, 55px);
+                gap: 8px;
             }
 
             .cell {
-                width: 42px;
-                height: 42px;
-                font-size: 12px;
+                width: 55px;
+                height: 55px;
+                font-size: 15px;
             }
         }
 
-        /* 🛡️ 遮罩樣式 - HUD 告示風格 */
+        /* HUD 遮罩提示 */
         #overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            border-radius: 10px;
+            padding: 20px 30px;
             color: #00f6ff;
-            font-size: 22px;
+            font-size: 20px;
+            box-shadow: 0 0 15px #00f6ff;
             display: none;
-            align-items: center;
-            justify-content: center;
             z-index: 999;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px #00f6ff;
         }
 
-        /* 🎆 煙火特效粒子 */
         .firework {
             position: fixed;
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
-            animation: explode 1.3s ease-out forwards;
+            animation: explode 1.2s ease-out forwards;
             z-index: 1000;
         }
 
@@ -157,7 +151,7 @@
 
             100% {
                 opacity: 0;
-                transform: scale(10);
+                transform: scale(12);
             }
         }
     </style>
