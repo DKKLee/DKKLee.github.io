@@ -2,213 +2,400 @@
 <html lang="zh-Hant">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Bingo Battle Pro v2</title>
+    <meta charset="UTF-8">
+    <title id="mainTitle">Bingo Battle</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
     <style>
+        /* 🚨 科技感背景 */
         body {
-            font-family: sans-serif;
+            margin: 0;
             padding: 20px;
+            font-family: 'Consolas', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #080808, #151515);
+            color: #00f6ff;
             text-align: center;
+            position: relative;
+            overflow-x: hidden;
         }
 
+        h2 {
+            font-size: 28px;
+            letter-spacing: 2px;
+            color: #00e1ff;
+            text-shadow: 0 0 10px #00e1ff;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 20px;
+        }
+
+        input,
+        button {
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            width: 90%;
+            max-width: 300px;
+            font-size: 16px;
+            box-sizing: border-box;
+            display: block;
+            font-family: inherit;
+        }
+
+        input {
+            background: #1f1f1f;
+            color: #00f6ff;
+            border: 1px solid #00f6ff;
+            box-shadow: 0 0 5px #00f6ff50;
+        }
+
+        button {
+            background: #00f6ff;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00f6ff;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        #playerInfo {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #00ffe7;
+            text-shadow: 0 0 6px #00ffe740;
+        }
+
+        /* 🟪 賓果格子樣式 - 晶片感 */
         .board {
             display: grid;
             grid-template-columns: repeat(5, 60px);
-            gap: 5px;
+            gap: 10px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .cell {
             width: 60px;
             height: 60px;
-            background: #eee;
-            border: 1px solid #999;
+            background: #1d1d1d;
+            color: #00f6ff;
+            font-weight: bold;
+            border-radius: 6px;
+            border: 1px solid #00f6ff50;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-weight: bold;
+            box-shadow: 0 0 10px #00f6ff20 inset;
+            transition: 0.3s;
+        }
+
+        .cell:hover {
+            box-shadow: 0 0 12px #00f6ff, inset 0 0 6px #00f6ff;
+            transform: scale(1.05);
         }
 
         .won {
-            background: gold;
-            color: black;
+            background: #00ff99;
+            color: #000;
+            box-shadow: 0 0 12px #00ff99, inset 0 0 6px #00ff99;
+        }
+
+        /* 📱 行動裝置支援 */
+        @media screen and (max-width: 600px) {
+            .board {
+                grid-template-columns: repeat(5, 42px);
+                gap: 7px;
+            }
+
+            .cell {
+                width: 42px;
+                height: 42px;
+                font-size: 12px;
+            }
+        }
+
+        /* 🛡️ 遮罩樣式 - HUD 告示風格 */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00f6ff;
+            font-size: 22px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00f6ff;
+        }
+
+        /* 🎆 煙火特效粒子 */
+        .firework {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: explode 1.3s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes explode {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(10);
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <h2>🔥 Bingo Battle Pro v2</h2>
-    <button onclick="login()">匿名登入</button>
-    <div id="playerInfo"></div>
+    <h2 id="clickTitle">🔥 Bingo Battle</h2>
 
-    <input type="text" id="roomInput" placeholder="房間代碼（可輸入任意代碼）" />
-    <select id="playerSelect">
-        <option value="playerA">Player A</option>
-        <option value="playerB">Player B</option>
-    </select>
+    <div id="clientPanel">
+        <input type="text" id="inputName" placeholder="輸入暱稱" />
+        <input type="text" id="inputPhone" placeholder="輸入電話" />
+        <button onclick="login()">登入</button>
+        <div id="playerInfo"></div>
 
-    <div class="board" id="board"></div>
-    <h3 id="scoreDisplay"></h3>
+        <div class="board" id="board"></div>
+        <div id="overlay">🏆 獲勝者已出爐</div>
+    </div>
+    <div id="adminPanel" style="display:none;">
+        <h3>🎉 公布勝利者</h3>
+        <button onclick="announceWinners()">公布並放煙火</button>
+        <ul id="winnerList"></ul>
+    </div>
 
     <script>
-        // 🔧 Firebase 設定（請替換成你的專案設定）
+        // 🔧 Firebase 初始化（請替換你的設定）
         const firebaseConfig = {
-            apiKey: "AIzaSyDfVYrZ07ZWwV_uYnbUFflU8iik93grvns",
-            authDomain: "bingogame-8bb16.firebaseapp.com",
-            projectId: "bingogame-8bb16",
-            storageBucket: "bingogame-8bb16.firebasestorage.app",
-            messagingSenderId: "913984914435",
-            appId: "1:913984914435:web:b26b5c396b54f20bfaba36",
-            measurementId: "G-HLMC4VXT5V"
+            apiKey: "AIzaSyBRLyJTY0TqEKtkQ0LAjF5BtenNHHUQ52k",
+            authDomain: "animal-game-d7461.firebaseapp.com",
+            projectId: "animal-game-d7461",
+            storageBucket: "animal-game-d7461.firebasestorage.app",
+            messagingSenderId: "857022080536",
+            appId: "1:857022080536:web:69813a9bac56f0b386056d",
+            measurementId: "G-29G94QDX9E"
         };
+
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.database();
 
-        let uid = "";
-        let name = "";
+        let playerId = "";    // Firebase 使用者 key
+        let playerName = "";
+        let clickCount = 0;
 
-        let 題庫 = [
-            "台灣的首都是？", "太陽從哪裡升起？", "3 × 4 = ?", "國慶日？", "紅色水果？",
-            "水的沸點？", "台灣最高山？", "你 的英文？", "春天是哪些月？", "台灣用什麼貨幣？",
-            "地球的衛星？", "Facebook創辦人？", "最高山？", "2 的二進位？", "日文貨幣？",
-            "CSS 是什麼縮寫？", "CPU 全名？", "React 是什麼？", "Pi 約等於？", "最多國家洲？",
-            "大象是陸上最大？", "火星別名？", "地球第3行星？", "HTML 是什麼？", "水的化學式？"
-        ];
-        let 答案庫 = [
-            "台北", "東方", "12", "10月10日", "蘋果",
-            "100", "玉山", "you", "3到5月", "新台幣",
-            "月亮", "Mark Zuckerberg", "玉山", "10", "日圓",
-            "Cascading Style Sheets", "Central Processing Unit", "JavaScript Library", "3.14", "非洲",
-            "是", "紅色星球", "地球", "HyperText Markup Language", "H2O"
-        ];
+        // 🔓 三下點擊標題 → 顯示後台
+        document.getElementById("clickTitle").addEventListener("click", () => {
+            clickCount++;
+            if (clickCount >= 3) {
+                document.getElementById("adminPanel").style.display = "block";
+                document.getElementById("clientPanel").style.display = "none";
 
-        const boardEl = document.getElementById("board");
-        const roomInput = document.getElementById("roomInput");
-        const playerSelect = document.getElementById("playerSelect");
-        const scoreDisplay = document.getElementById("scoreDisplay");
-
-        const login = () => {
-            auth.signInAnonymously()
-                .then(result => {
-                    uid = result.user.uid;
-                    name = "Guest";
-                    document.getElementById("playerInfo").textContent = `👤 已登入：${name}`;
-                });
-        };
-
-        function shuffle題庫與答案(題庫, 答案庫) {
-            let combined = 題庫.map((q, i) => ({ question: q, answer: 答案庫[i] }));
-            for (let i = combined.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [combined[i], combined[j]] = [combined[j], combined[i]];
+                clickCount = 0;
             }
-            // 拆回來
-            const shuffled題庫 = combined.map(item => item.question);
-            const shuffled答案庫 = combined.map(item => item.answer);
-            return { shuffled題庫, shuffled答案庫 };
+        });
+
+        // 🔍 用 name + phone 找到 userKey
+        function getUserKeyByNamePhone(usersObj, name, phone) {
+            const matchEntry = Object.entries(usersObj).find(
+                ([key, value]) => value.name === name && value.phone === phone
+            );
+            return matchEntry ? matchEntry[0] : null;
         }
 
-        let { shuffled題庫, shuffled答案庫 } = shuffle題庫與答案(題庫, 答案庫);
-        題庫 = shuffled題庫;
-        答案庫 = shuffled答案庫;
+        // ✅ 登入邏輯（防止已結束遊戲）
+        function login() {
+            const name = document.getElementById("inputName").value.trim();
+            const phone = document.getElementById("inputPhone").value.trim();
 
-        const drawBoard = () => {
-            boardEl.innerHTML = "";
-            題庫.forEach((_, i) => {
-                const cell = document.createElement("div");
-                cell.className = "cell";
-                cell.textContent = "❓";
-                cell.id = `cell-${i}`;
-                cell.onclick = () => showQuestion(i);
-                boardEl.appendChild(cell);
-            });
-        };
-
-
-
-        const showQuestion = (i) => {
-            const room = roomInput.value || "defaultRoom";
-            const player = playerSelect.value;
-
-            db.ref(`game/${room}/answers/${i}`).once("value", snapshot => {
-                const data = snapshot.val();
-                if (data?.answeredBy) {
-                    alert(`❗ 此題已被 ${data.answeredBy} 答對`);
+            db.ref("bingowinners/defaultRoom").once("value").then(winnerSnap => {
+                const winners = winnerSnap.val() || [];
+                if (winners.length > 0) {
+                    alert("❌ 本場遊戲已結束，請等待下一場！");
                     return;
                 }
 
+                db.ref("lottery/users").once("value").then(snapshot => {
+                    const users = snapshot.val() || {};
+                    const key = getUserKeyByNamePhone(users, name, phone);
+                    if (key) {
+                        playerId = key;
+                        playerName = users[key].name;
+                        document.getElementById("playerInfo").textContent = `👤 歡迎 ${playerName}`;
+                        initGame();
+                    } else {
+                        alert("❌ 登入失敗，請檢查輸入是否正確");
+                    }
+                });
+            });
+        }
+    </script>
+    <script>
+        // 題庫（數字計算題）
+        const 題庫 = [
+            "7 × 8 = ?", "15 ÷ 3 = ?", "9 + 6 = ?", "100 − 17 = ?", "5 × 5 = ?",
+            "81 ÷ 9 = ?", "12 × 12 = ?", "50 + 25 = ?", "7 × 6 = ?", "9 × 9 = ?",
+            "8 × 4 = ?", "18 ÷ 2 = ?", "45 − 20 = ?", "100 ÷ 4 = ?", "6 × 7 = ?",
+            "3² = ?", "√49 = ?", "6 × 0 = ?", "1 + 2 + 3 = ?", "2⁵ = ?",
+            "10% of 200 = ?", "0.5 × 10 = ?", "25 ÷ 5 = ?", "20 + 22 = ?", "16 ÷ 4 = ?"
+        ];
+        const 答案庫 = [
+            "56", "5", "15", "83", "25",
+            "9", "144", "75", "42", "81",
+            "32", "9", "25", "25", "42",
+            "9", "7", "0", "6", "32",
+            "20", "5", "5", "42", "4"
+        ];
+
+        // 遊戲初始化
+        function initGame() {
+            const board = document.getElementById("board");
+            board.innerHTML = "";
+            題庫.forEach((q, i) => {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.id = `cell-${i}`;
+                cell.textContent = "❓";
+                cell.onclick = () => showQuestion(i);
+                board.appendChild(cell);
+            });
+            listenAnswers();
+            listenWinners();
+        }
+
+        // 答題邏輯
+        function showQuestion(i) {
+            const path = `bingogame/defaultRoom/${playerId}/answers/${i}`;
+            db.ref(path).once("value").then(snapshot => {
+                if (snapshot.exists()) {
+                    alert("✅ 此題已作答！");
+                    return;
+                }
                 const userAnswer = prompt(`📋 題目：${題庫[i]}`);
-                if (userAnswer?.toLowerCase().trim() === 答案庫[i].toLowerCase()) {
-                    db.ref(`game/${room}/answers/${i}`).set({ answeredBy: player });
+                if (!userAnswer) return;
+
+                if (userAnswer.trim() === 答案庫[i]) {
+                    db.ref(path).set({ correct: true });
                 } else {
                     alert("❌ 錯誤答案！");
                 }
             });
+        }
 
-        };
+        // 答題後更新視覺與判斷三條
+        function listenAnswers() {
+            const path = `bingogame/defaultRoom/${playerId}/answers`;
+            db.ref(path).on("value", snapshot => {
+                const answered = Object.keys(snapshot.val() || {}).map(Number);
 
-        const listenUpdates = () => {
-            const room = roomInput.value || "defaultRoom";
-            scoreDisplay.innerHTML = "";
-
-            db.ref(`game/${room}/answers`).on("value", snapshot => {
-                const data = snapshot.val() || {};
-                Object.entries(data).forEach(([i, obj]) => {
+                answered.forEach(i => {
                     const cell = document.getElementById(`cell-${i}`);
-                    if (!cell) return;
-                    if (obj.answeredBy === "playerA") {
+                    if (cell) {
+                        cell.textContent = "✔";
                         cell.style.background = "#4caf50";
-                        cell.textContent = "A";
-                    } else if (obj.answeredBy === "playerB") {
-                        cell.style.background = "#2196f3";
-                        cell.textContent = "B";
                     }
                 });
 
-                ["playerA", "playerB"].forEach(player => {
-                    const cells = Object.entries(data).filter(([_, obj]) => obj.answeredBy === player).map(([i]) => parseInt(i));
-                    checkWin(cells, room, player);
+                // 判斷連線
+                const lines = [
+                    [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+                    [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+                    [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+                ];
+                let count = 0;
+                lines.forEach(line => {
+                    if (line.every(i => answered.includes(i))) {
+                        count++;
+                        line.forEach(c => {
+                            const cell = document.getElementById(`cell-${c}`);
+                            if (cell) cell.classList.add("won");
+                        });
+                    }
+                });
+
+                db.ref(`progress/defaultRoom/${playerId}`).set(count);
+
+                if (count >= 3) {
+                    db.ref("bingowinners/defaultRoom").transaction(list => {
+                        if (!list) return [playerId];
+                        if (list.includes(playerId)) return;
+                        if (list.length < 3) return [...list, playerId];
+                        return list;
+                    });
+                }
+            });
+        }
+        function listenWinners() {
+            db.ref("bingowinners/defaultRoom").on("value", snap => {
+                const winners = snap.val() || [];
+                const overlay = document.getElementById("overlay");
+                if (winners.length > 0) {
+                    if (winners.includes(playerId)) {
+                        overlay.style.display = "flex";
+                        overlay.textContent = `🎉 恭喜 ${playerName}，你已獲勝！`;
+                    } else if (winners.length === 1) {
+                        overlay.style.display = "flex";
+                        overlay.textContent = `🏆 獲勝者已出爐`;
+                    }
+                }
+            });
+        }
+
+        function announceWinners() {
+            // 🎆 放煙火
+            for (let i = 0; i < 30; i++) {
+                const fw = document.createElement("div");
+                fw.className = "firework";
+                fw.style.top = `${Math.random() * window.innerHeight}px`;
+                fw.style.left = `${Math.random() * window.innerWidth}px`;
+                fw.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                document.body.appendChild(fw);
+                setTimeout(() => fw.remove(), 1000);
+            }
+
+            // 🔍 查贏家名字
+            db.ref("bingowinners/defaultRoom").once("value").then(snap => {
+                const winnerIds = snap.val() || [];
+                const listEl = document.getElementById("winnerList");
+                listEl.innerHTML = "";
+                db.ref("lottery/users").once("value").then(userSnap => {
+                    const users = userSnap.val() || {};
+                    winnerIds.forEach(id => {
+                        const name = users[id]?.name || `匿名 (${id})`;
+                        const li = document.createElement("li");
+                        li.textContent = name;
+                        listEl.appendChild(li);
+                    });
                 });
             });
 
-            // ["playerA", "playerB"].forEach(player => {
-            //     db.ref(`score/${room}/${player}`).on("value", snap => {
-            //         const score = snap.val() || 0;
-            //         const label = document.createElement("div");
-            //         label.textContent = `${player}: ${score} 分`;
-            //         scoreDisplay.appendChild(label);
-            //     });
-            // });
-        };
-
-        const checkWin = (clicked, room, player) => {
-            const lines = [
-                [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
-                [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
-                [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
-            ];
-            lines.forEach(line => {
-                if (line.every(x => clicked.includes(x))) {
-                    line.forEach(c => {
-                        const cell = document.getElementById(`cell-${c}`);
-                        if (cell) cell.classList.add("won");
-                    });
-                    alert(`🎉 ${player} 贏了！`);
-                    db.ref(`score/${room}/${player}`).transaction(s => (s || 0) + 10);
-                }
-            });
-        };
-
-        drawBoard();
-        roomInput.onchange = listenUpdates;
-        playerSelect.onchange = listenUpdates;
+            // 🔄 自動重置（5秒後）
+            setTimeout(() => {
+                db.ref("bingogame/defaultRoom").remove();
+                db.ref("progress/defaultRoom").remove();
+                db.ref("bingowinners/defaultRoom").remove();
+                document.getElementById("overlay").style.display = "none";
+                document.getElementById("winnerList").innerHTML = "";
+                initGame();
+            }, 5000);
+        }
     </script>
 
 </body>
