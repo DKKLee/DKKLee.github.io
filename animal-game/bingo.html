@@ -16,6 +16,7 @@
             color: #00f0ff;
             text-align: center;
             padding: 20px;
+            height: 100dvh;
         }
 
         h2 {
@@ -120,7 +121,7 @@
         /* HUD 遮罩提示 */
         #overlay {
             position: fixed;
-            top: 25%;
+            top: 35%;
             left: 50%;
             transform: translateX(-50%);
             background: #111;
@@ -141,6 +142,147 @@
             border-radius: 50%;
             animation: explode 1.2s ease-out forwards;
             z-index: 1000;
+        }
+
+        /* 下拉選單容器 */
+        .dropdown {
+            position: relative;
+        }
+
+        /* 下拉選單內容 (隱藏) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #0d1a2a;
+            /* 與背景相同的深藍色 */
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.6);
+            z-index: 1;
+            border: 1px solid #00e6e6;
+            /* 亮青色邊框 */
+            border-radius: 8px;
+            overflow: hidden;
+            /* 確保圓角生效 */
+            top: calc(100% + 10px);
+            /* 距離按鈕下方10px */
+            left: 25%;
+            opacity: 0;
+            /* 初始透明度為0 */
+            transform: translateY(-10px);
+            /* 初始位置向上移動10px */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            /* 平滑過渡效果 */
+        }
+
+        /* 下拉選單的選項 */
+        .dropdown-content a {
+            color: #a0ffff;
+            /* 淺青色文字 */
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-bottom: 1px solid rgba(0, 230, 230, 0.2);
+            /* 分隔線 */
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+            /* 最後一個選項沒有底線 */
+        }
+
+        /* 選項鼠標懸停效果 */
+        .dropdown-content a:hover {
+            background-color: #1a3a5a;
+            /* 懸停時顏色變深 */
+            color: #00e6e6;
+            /* 懸停時文字變亮 */
+        }
+
+        /* 顯示下拉選單內容 */
+        .dropdown-content.show {
+            display: block;
+            opacity: 1;
+            /* 顯示時透明度為1 */
+            transform: translateY(0);
+            /* 顯示時回到原始位置 */
+        }
+
+        .tech-list-container {
+            display: none;
+            margin-top: 20px;
+            background-color: #1a3a5a;
+            /* 列表容器的背景，比 body 略淺 */
+            border: 1px solid #00e6e6;
+            /* 亮青色邊框 */
+            border-radius: 10px;
+            /* 圓角 */
+            padding: 5px 15px;
+            box-shadow: 0 0 20px rgba(0, 230, 230, 0.5);
+            /* 發光效果 */
+            backdrop-filter: blur(5px);
+            /* 輕微的模糊效果，增加科技感 */
+            -webkit-backdrop-filter: blur(5px);
+            /* 兼容 Safari */
+            overflow: hidden;
+            /* 確保內容不會溢出圓角 */
+        }
+
+        /* 列表本身 */
+        .tech-list {
+            list-style: none;
+            /* 移除預設的列表符號 */
+            padding: 0;
+            margin: 0;
+        }
+
+        /* 列表項目 */
+        .tech-list li {
+            padding: 12px 10px;
+            font-size: 1.2em;
+            /* 字體大小 */
+            border-bottom: 1px dashed rgba(0, 230, 230, 0.3);
+            /* 虛線分隔符 */
+            transition: all 0.3s ease;
+            /* 平滑過渡效果 */
+            position: relative;
+            padding-left: 30px;
+            /* 為自定義的列表符號留出空間 */
+            letter-spacing: 0.5px;
+            /* 字距 */
+        }
+
+        /* 移除最後一個項目的底線 */
+        .tech-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* 列表項目的偽元素作為科技感符號 */
+        .tech-list li::before {
+            content: '🏅';
+            /* 使用箭頭作為符號 */
+            color: #00e6e6;
+            /* 亮青色 */
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
+        }
+
+        /* 列表項目鼠標懸停效果 */
+        .tech-list li:hover {
+            color: #00e6e6;
+            /* 懸停時文字變亮 */
+            transform: translateX(5px);
+            /* 輕微向右移動 */
+        }
+
+        .tech-list li:hover::before {
+            transform: translateY(-50%) translateX(5px);
+            /* 符號也跟著移動 */
         }
 
         @keyframes explode {
@@ -170,12 +312,26 @@
         <div id="playerInfo"></div>
 
         <div class="board" id="board"></div>
-        <div id="overlay">🏆 獲勝者已出爐</div>
     </div>
+    <div id="overlay">🏆 獲勝者已出爐</div>
     <div id="adminPanel" style="display:none;">
         <h3>🎉 公布勝利者</h3>
+        <button onclick="startGameCountdown()">開始遊戲</button>
+        <div class="dropdown">
+            <button class="dropbtn">贏家人數 : 1</button>
+            <div class="dropdown-content">
+                <a href="#" val="1">贏家人數 : 1</a>
+                <a href="#" val="2">贏家人數 : 2</a>
+                <a href="#" val="3">贏家人數 : 3</a>
+                <a href="#" val="4">贏家人數 : 4</a>
+                <a href="#" val="5">贏家人數 : 5</a>
+            </div>
+        </div>
         <button onclick="announceWinners()">公布並放煙火</button>
-        <ul id="winnerList"></ul>
+        <div class="tech-list-container">
+            <ul id="winnerList" class="tech-list">
+            </ul>
+        </div>
     </div>
 
     <script>
@@ -196,6 +352,7 @@
         let playerId = "";    // Firebase 使用者 key
         let playerName = "";
         let clickCount = 0;
+        let winnersCount = 1;
 
         // 🔓 三下點擊標題 → 顯示後台
         document.getElementById("clickTitle").addEventListener("click", () => {
@@ -205,6 +362,30 @@
                 document.getElementById("clientPanel").style.display = "none";
 
                 clickCount = 0;
+
+                // 贏家人數
+                const dropdownBtn = document.querySelector('.dropbtn');
+                const dropdownContent = document.querySelector('.dropdown-content');
+                const dropdownItems = dropdownContent.querySelectorAll('a');
+                db.ref("bingo/winners").on("value", snap => {
+                    const started = snap.val() || 1;
+                    winnersCount = started;
+                    // 檢查確保第選項存在
+                    if (dropdownItems.length > (started - 1)) {
+                        const defaultSelectedItem = dropdownItems[started - 1];
+                        dropdownBtn.textContent = defaultSelectedItem.textContent;
+                    }
+                });
+                db.ref("bingowinners/defaultRoom").on("value", snap => {
+                    const winners = snap.val() || [];
+                    const overlay = document.getElementById("overlay");
+                    if (winners.length > 0 && winners.length === parseInt(winnersCount)) {
+                        overlay.style.display = "flex";
+                        overlay.textContent = `🏆 獲勝者已出爐`;
+
+                        setTimeout(() => overlay.style.display = "none", 5000);
+                    }
+                });
             }
         });
 
@@ -243,8 +424,6 @@
                 });
             });
         }
-    </script>
-    <script>
         // 題庫（數字計算題）
         const 題庫 = [
             "7 × 8 = ?", "15 ÷ 3 = ?", "9 + 6 = ?", "100 − 17 = ?", "5 × 5 = ?",
@@ -275,6 +454,7 @@
             });
             listenAnswers();
             listenWinners();
+            lsitenStatus();
         }
 
         // 答題邏輯
@@ -347,7 +527,7 @@
                     if (winners.includes(playerId)) {
                         overlay.style.display = "flex";
                         overlay.textContent = `🎉 恭喜 ${playerName}，你已獲勝！`;
-                    } else if (winners.length === 1) {
+                    } else if (winners.length === winnersCount) {
                         overlay.style.display = "flex";
                         overlay.textContent = `🏆 獲勝者已出爐`;
                     }
@@ -372,6 +552,7 @@
                 const winnerIds = snap.val() || [];
                 const listEl = document.getElementById("winnerList");
                 listEl.innerHTML = "";
+
                 db.ref("lottery/users").once("value").then(userSnap => {
                     const users = userSnap.val() || {};
                     winnerIds.forEach(id => {
@@ -381,18 +562,184 @@
                         listEl.appendChild(li);
                     });
                 });
+                document.querySelector(".tech-list-container").style.display = "inline-block";
             });
 
             // 🔄 自動重置（5秒後）
-            setTimeout(() => {
-                db.ref("bingogame/defaultRoom").remove();
-                db.ref("progress/defaultRoom").remove();
-                db.ref("bingowinners/defaultRoom").remove();
-                document.getElementById("overlay").style.display = "none";
-                document.getElementById("winnerList").innerHTML = "";
-                initGame();
-            }, 5000);
+            // setTimeout(() => {
+            //     db.ref("bingogame/defaultRoom").remove();
+            //     db.ref("progress/defaultRoom").remove();
+            //     db.ref("bingowinners/defaultRoom").remove();
+            //     db.ref("bingo/status").set(false);
+            //     db.ref("bingo/sec").set("5");
+            //     db.ref("bingo/winners").set("1");
+            //     document.getElementById("overlay").style.display = "none";
+            //     document.getElementById("winnerList").innerHTML = "";
+            //     initGame();
+            // }, 5000);
         }
+
+        // 🔊 預先載入音效
+        const tickSound = new Audio("https://freesound.org/data/previews/341/341695_3248244-lq.mp3");
+        const startSound = new Audio("https://freesound.org/data/previews/334/334004_3248244-lq.mp3");
+
+        // ⏳ 倒數開始
+        function startGameCountdown() {
+            //開始前先重置
+            db.ref("bingogame/defaultRoom").remove();
+            db.ref("progress/defaultRoom").remove();
+            db.ref("bingowinners/defaultRoom").remove();
+            db.ref("bingo/status").set(false);
+            db.ref("bingo/sec").set("5");
+            db.ref("bingo/winners").set("1");
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("winnerList").innerHTML = "";
+            initGame();
+
+            setTimeout(() => {
+                let sec = 5;
+                db.ref("bingo/status").set(true);
+                db.ref("bingo/sec").set(sec);
+
+                const timer = setInterval(() => {
+                    sec--;
+                    db.ref("bingo/sec").set(sec);
+                    //tickSound.play();
+                    if (sec <= 0) {
+                        clearInterval(timer);
+                        //startSound.play();
+                        triggerFlashAnimation();
+                    }
+                }, 1000);
+            }, 1000);
+        }
+
+        function lsitenStatus() {
+            // 🎭 玩家端遮罩 HUD
+            db.ref("bingo/status").on("value", snap => {
+                const started = snap.val();
+                const overlay = document.getElementById("overlay");
+                if (!started) {
+                    overlay.style.display = "flex";
+                    overlay.textContent = "🕒 等待遊戲開始...";
+                } else {
+                    db.ref("bingo/sec").on("value", secSnap => {
+                        const sec = secSnap.val();
+                        if (sec > 0) {
+                            overlay.style.display = "flex";
+                            overlay.textContent = `⏳ 倒數中：${sec} 秒`;
+                        } else {
+                            overlay.style.display = "none";
+                        }
+                    });
+                }
+            });
+            // 贏家人數
+            db.ref("bingo/winners").on("value", snap => {
+                const started = snap.val();
+                winnersCount = started || 1;
+            });
+        }
+
+        // 🌠 閃光動畫
+        function triggerFlashAnimation() {
+            const flash = document.createElement("div");
+            flash.style.position = "fixed";
+            flash.style.top = "0";
+            flash.style.left = "0";
+            flash.style.width = "100%";
+            flash.style.height = "100%";
+            flash.style.background = "#00f6ff";
+            flash.style.opacity = "0.8";
+            flash.style.zIndex = "9999";
+            flash.style.animation = "flashFade 0.8s ease-out";
+            document.body.appendChild(flash);
+
+            const bingoText = document.createElement("div");
+            bingoText.textContent = "✨ BINGO 開始！ ✨";
+            bingoText.style.position = "fixed";
+            bingoText.style.top = "40%";
+            bingoText.style.left = "50%";
+            bingoText.style.transform = "translateX(-50%)";
+            bingoText.style.color = "#000";
+            bingoText.style.fontSize = "32px";
+            bingoText.style.fontWeight = "bold";
+            bingoText.style.zIndex = "10000";
+            bingoText.style.textShadow = "0 0 20px #fff";
+            bingoText.style.whiteSpace = "nowrap";
+            document.body.appendChild(bingoText);
+
+            setTimeout(() => {
+                flash.remove();
+                bingoText.remove();
+            }, 1000);
+        }
+
+        // 🔑 禁止作答（倒數期間）
+        function showQuestion(i) {
+            db.ref("bingo/sec").once("value").then(secSnap => {
+                const sec = secSnap.val();
+                if (sec > 0) {
+                    alert("⛔ 請等待遊戲正式開始！");
+                    return;
+                }
+
+                const path = `bingogame/defaultRoom/${playerId}/answers/${i}`;
+                db.ref(path).once("value").then(snapshot => {
+                    if (snapshot.exists()) {
+                        alert("✅ 此題已作答！");
+                        return;
+                    }
+
+                    const userAnswer = prompt(`📋 題目：${題庫[i]}`);
+                    if (!userAnswer) return;
+
+                    if (userAnswer.trim() === 答案庫[i]) {
+                        db.ref(path).set({ correct: true });
+                    } else {
+                        alert("❌ 錯誤答案！");
+                    }
+                });
+            });
+        }
+
+        // 🌈 加入動畫 keyframe
+        const style = document.createElement("style");
+        style.textContent = `@keyframes flashFade { 0% { opacity: 0.8; } 100% { opacity: 0; }}`;
+        document.head.appendChild(style);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownBtn = document.querySelector('.dropbtn');
+            const dropdownContent = document.querySelector('.dropdown-content');
+            const dropdownItems = dropdownContent.querySelectorAll('a');
+
+            // 點擊按鈕時切換下拉選單的顯示/隱藏
+            dropdownBtn.addEventListener('click', function () {
+                dropdownContent.classList.toggle('show');
+            });
+
+            // 點擊下拉選單選項時更新按鈕文字、隱藏選單並跳出 alert
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function (event) {
+                    event.preventDefault(); // 防止跳轉
+                    const selectedNumber = this.textContent; // 取得選取的數字
+                    dropdownBtn.textContent = selectedNumber; // 更新按鈕文字
+                    dropdownContent.classList.remove('show'); // 隱藏選單
+                    db.ref("bingo/winners").set(this.getAttribute('val')); // 更新 Firebase 中的贏家人數
+                    // 跳出 alert 訊息
+                    alert('您選擇了：' + selectedNumber);
+                });
+            });
+
+            // 點擊選單外部時隱藏下拉選單
+            window.addEventListener('click', function (event) {
+                if (!event.target.matches('.dropbtn') && !event.target.closest('.dropdown-content')) {
+                    if (dropdownContent.classList.contains('show')) {
+                        dropdownContent.classList.remove('show');
+                    }
+                }
+            });
+        });
     </script>
 
 </body>
