@@ -317,6 +317,7 @@
     <div id="adminPanel" style="display:none;">
         <h3>🎉 公布勝利者</h3>
         <button onclick="startGameCountdown()">開始遊戲</button>
+        <button onclick="resetGame()">重置遊戲</button>
         <div class="dropdown">
             <button class="dropbtn">贏家人數 : 1</button>
             <div class="dropdown-content">
@@ -585,33 +586,33 @@
 
         // ⏳ 倒數開始
         function startGameCountdown() {
-            //開始前先重置
+            let sec = 5;
+            db.ref("bingo/status").set(true);
+            db.ref("bingo/sec").set(sec);
+
+            const timer = setInterval(() => {
+                sec--;
+                db.ref("bingo/sec").set(sec);
+                //tickSound.play();
+                if (sec <= 0) {
+                    clearInterval(timer);
+                    //startSound.play();
+                    triggerFlashAnimation();
+                }
+            }, 1000);
+        }
+
+        //重置遊戲
+        function resetGame() {
             db.ref("bingogame/defaultRoom").remove();
             db.ref("progress/defaultRoom").remove();
             db.ref("bingowinners/defaultRoom").remove();
             db.ref("bingo/status").set(false);
-            db.ref("bingo/sec").set("5");
-            db.ref("bingo/winners").set("1");
+            db.ref("bingo/sec").set(5);
+            db.ref("bingo/winners").set(1);
             document.getElementById("overlay").style.display = "none";
             document.getElementById("winnerList").innerHTML = "";
             initGame();
-
-            setTimeout(() => {
-                let sec = 5;
-                db.ref("bingo/status").set(true);
-                db.ref("bingo/sec").set(sec);
-
-                const timer = setInterval(() => {
-                    sec--;
-                    db.ref("bingo/sec").set(sec);
-                    //tickSound.play();
-                    if (sec <= 0) {
-                        clearInterval(timer);
-                        //startSound.play();
-                        triggerFlashAnimation();
-                    }
-                }, 1000);
-            }, 1000);
         }
 
         function lsitenStatus() {
