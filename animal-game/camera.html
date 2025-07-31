@@ -314,7 +314,8 @@
           });
 
           // 彈出提示框
-          //alert(`您選擇了: ${optionText}`);
+          alert(`您選擇了: ${optionText}`);
+          startCamera(); // 每次選擇後重新啟動相機
         }
       });
     });
@@ -386,9 +387,29 @@
     overlayImg.onclick = doTakePhoto;
 
     // 啟動相機
+    // async function startCamera() {
+    //   try {
+    //     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    //     video.srcObject = stream;
+    //   } catch (err) {
+    //     alert('無法開啟相機：' + err);
+    //   }
+    // }
     async function startCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        // 🔻 如果已有串流，先停止
+        if (video.srcObject) {
+          const tracks = video.srcObject.getTracks();
+          tracks.forEach(track => track.stop()); // 停止所有 video/audio tracks
+          video.srcObject = null;
+        }
+
+        // 🔺 再開啟新的串流
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false
+        });
+
         video.srcObject = stream;
       } catch (err) {
         alert('無法開啟相機：' + err);
