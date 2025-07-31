@@ -308,14 +308,10 @@
           // 這裡我們找到對應的 label，然後獲取其 textContent
           const selectedLabel = document.querySelector(`label[for="${this.id}"]`);
           const optionText = selectedLabel ? selectedLabel.textContent.trim() : this.value;
-          // overlayImg.src = `${this.value}.png`; // 假設圖片名稱與 value 相同
-          requestAnimationFrame(() => {
-            overlayImg.src = `${this.value}.png`;
-          });
-
+          overlayImg.src = `${this.value}.png`; // 假設圖片名稱與 value 相同
+          startCamera(); // 每次選擇後重新啟動相機
           // 彈出提示框
           alert(`您選擇了: ${optionText}`);
-          startCamera(); // 每次選擇後重新啟動相機
         }
       });
     });
